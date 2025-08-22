@@ -9,6 +9,7 @@ from typing import Dict, List, Optional
 import json
 import asyncio
 import uuid
+import base64
 from datetime import datetime
 
 # Imports locaux
@@ -45,6 +46,8 @@ class ChatMessage(BaseModel):
     message: str
     session_id: Optional[str] = None
     user_id: Optional[int] = None
+    audio_data: Optional[str] = None  # Base64 encoded audio
+    audio_format: Optional[str] = "webm"
 
 class ChatResponse(BaseModel):
     success: bool
@@ -170,10 +173,22 @@ async def get_current_user_info(current_user: User = Depends(get_current_user)):
 async def chat_endpoint(message: ChatMessage):
     """Endpoint REST pour le chat (utilise l'orchestrateur SMA)"""
     session_id = message.session_id or str(uuid.uuid4())
+    
+    # Traiter l'audio si présent
+    audio_data = None
+    if message.audio_data:
+        try:
+            audio_data = base64.b64decode(message.audio_data)
+        except Exception as e:
+            logger.error(f"Erreur décodage audio: {e}")
+            raise HTTPException(status_code=400, detail="Format audio invalide")
+    
     result = await chatbot_orchestrator.process_message(
         message=message.message,
         session_id=session_id,
-        user_id=message.user_id
+        user_id=message.user_id,
+        audio_data=audio_data,
+        audio_format=message.audio_format
     )
     
     response = ChatResponse(
@@ -203,7 +218,10 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str, user_id: Opt
             message_data = json.loads(data)
             
             user_message = message_data.get("message", "")
-            if not user_message.strip():
+            audio_data = message_data.get("audio_data")
+            audio_format = message_data.get("audio_format", "webm")
+            
+            if not user_message.strip() and not audio_data:
                 continue
             
             # Envoyer une indication de frappe
@@ -213,7 +231,50 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str, user_id: Opt
                 "timestamp": datetime.utcnow().isoformat()
             })
             
-            # Traiter le message
+            # Traiter l'audio si présent
+            audio_bytes = None
+            if audio_data:
+                try:
+                    audio_bytes = base64.b64decode(audio_data)
+                    logger.info(f"Audio reçu pour session {session_id}")
+                    
+                    # Traiter l'audio avec l'agent voix
+                    audio_result = await chatbot_orchestrator.process_message(
+                        message="",
+                        session_id=session_id,
+                        user_id=user_id,
+                        audio_data=audio_bytes,
+                        audio_format=audio_format
+                    )
+                    
+                    # Si transcription réussie, envoyer le texte transcrit
+                    if audio_result.get("success") and audio_result.get("response"):
+                        await manager.send_message(session_id, {
+                            "type": "response",
+                            "transcribed_text": audio_result["response"],
+                            "timestamp": datetime.utcnow().isoformat()
+                        })
+                        # Ne pas continuer avec le traitement normal pour l'audio
+                        continue
+                    else:
+                        # Erreur de transcription
+                        await manager.send_message(session_id, {
+                            "type": "error",
+                            "message": "Erreur lors de la transcription audio. Veuillez réessayer.",
+                            "timestamp": datetime.utcnow().isoformat()
+                        })
+                        continue
+                        
+                except Exception as e:
+                    logger.error(f"Erreur décodage audio: {e}")
+                    await manager.send_message(session_id, {
+                        "type": "error",
+                        "message": "Erreur lors du traitement de l'audio",
+                        "timestamp": datetime.utcnow().isoformat()
+                    })
+                    continue
+            
+            # Traiter le message texte normal
             result = await chatbot_orchestrator.process_message(
                 message=user_message,
                 session_id=session_id,

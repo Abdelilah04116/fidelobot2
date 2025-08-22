@@ -63,3 +63,6 @@ Pour vérifier que le bon agent est utilisé, regardez les logs qui affichent :
 - Le système SMA route automatiquement vers l'agent le plus approprié
 - Les réponses doivent être dynamiques et non statiques
 
+
+
+

@@ -15,6 +15,7 @@ from SMA.agents.summarizer_agent import SummarizerAgent
 from SMA.agents.escalation_agent import EscalationAgent
 from SMA.agents.order_management_agent import OrderManagementAgent
 from SMA.agents.cart_management_agent import CartManagementAgent
+from SMA.agents.voice_agent import VoiceAgent
 
 class ChatState(TypedDict):
     """État partagé entre tous les agents"""
@@ -22,6 +23,11 @@ class ChatState(TypedDict):
     user_message: str
     session_id: str
     user_id: Annotated[int, operator.add]
+    
+    # Données audio
+    audio_data: bytes
+    audio_format: str
+    is_audio_message: bool
     
     # Contexte de conversation
     conversation_history: Annotated[List[Dict], operator.add]
@@ -53,6 +59,7 @@ class ChatState(TypedDict):
 class ChatBotOrchestrator:
     def __init__(self):
         self.agents = {
+            "voice_agent": VoiceAgent(),
             "conversation_agent": ConversationAgent(),
             "product_search_agent": ProductSearchAgent(),
             "recommendation_agent": RecommendationAgent(),
@@ -70,6 +77,7 @@ class ChatBotOrchestrator:
         workflow = StateGraph(ChatState)
         
         # Ajouter les nœuds (agents)
+        workflow.add_node("voice_agent", self._voice_node)
         workflow.add_node("conversation_agent", self._conversation_node)
         workflow.add_node("profiling_agent", self._profiling_node)
         workflow.add_node("product_search_agent", self._product_search_node)
@@ -81,7 +89,17 @@ class ChatBotOrchestrator:
         workflow.add_node("final_response", self._final_response_node)
         
         # Définir les arêtes et conditions
-        workflow.set_entry_point("conversation_agent")
+        workflow.set_entry_point("voice_agent")
+        
+        # Flux après traitement audio
+        workflow.add_conditional_edges(
+            "voice_agent",
+            self._route_after_voice,
+            {
+                "conversation_agent": "conversation_agent",
+                "final_response": "final_response"
+            }
+        )
         
         # Flux principal
         workflow.add_edge("conversation_agent", "profiling_agent")
@@ -130,6 +148,30 @@ class ChatBotOrchestrator:
         return workflow.compile()
     
     # Nœuds d'exécution des agents
+    async def _voice_node(self, state: ChatState) -> ChatState:
+        """Nœud de l'agent de traitement vocal"""
+        if state.get("is_audio_message") and state.get("audio_data"):
+            # Traiter l'audio
+            audio_result = await self.agents["voice_agent"].process_audio(
+                state["audio_data"], 
+                state.get("audio_format", "webm")
+            )
+            
+            if audio_result["success"]:
+                # Remplacer le message utilisateur par le texte transcrit
+                state["user_message"] = audio_result["transcribed_text"]
+                state["agents_used"] = state.get("agents_used", []) + ["voice_agent"]
+                logger.info(f"Audio transcrit: {audio_result['transcribed_text']}")
+            else:
+                # En cas d'échec, retourner une réponse d'erreur
+                state["response_text"] = f"Erreur lors de la transcription audio: {audio_result.get('error', 'Erreur inconnue')}"
+                state["agents_used"] = state.get("agents_used", []) + ["voice_agent"]
+        else:
+            # Pas d'audio, continuer normalement
+            pass
+        
+        return state
+    
     async def _conversation_node(self, state: ChatState) -> ChatState:
         """Nœud de l'agent de conversation"""
         result = await self.agents["conversation_agent"].execute(state)
@@ -300,6 +342,15 @@ class ChatBotOrchestrator:
         return state
     
     # Fonctions de routage conditionnel
+    def _route_after_voice(self, state: ChatState) -> str:
+        """Router après le traitement vocal"""
+        # Si on a une réponse d'erreur de l'agent voix, aller directement à la réponse finale
+        if state.get("response_text") and "Erreur lors de la transcription" in state.get("response_text", ""):
+            return "final_response"
+        
+        # Sinon, continuer avec le traitement normal
+        return "conversation_agent"
+    
     def _route_after_profiling(self, state: ChatState) -> str:
         """Router après le profilage utilisateur"""
         intent = state.get("intent", "")
@@ -538,7 +589,7 @@ class ChatBotOrchestrator:
                 pass
     
     # Interface principale
-    async def process_message(self, message: str, session_id: str, user_id: int = None) -> Dict[str, Any]:
+    async def process_message(self, message: str, session_id: str, user_id: int = None, audio_data: bytes = None, audio_format: str = "webm") -> Dict[str, Any]:
         """Traiter un message utilisateur dynamiquement avec les agents"""
         import time
         import logging
@@ -548,11 +599,42 @@ class ChatBotOrchestrator:
         try:
             logger.info(f"[process_message] Début du traitement pour: {message}")
             
+            # Si c'est un message audio, traiter directement avec l'agent voix
+            if audio_data is not None:
+                logger.info(f"[process_message] Traitement audio pour session {session_id}")
+                audio_result = await self.agents["voice_agent"].process_audio(audio_data, audio_format)
+                
+                if audio_result["success"]:
+                    return {
+                        "success": True,
+                        "response": audio_result["transcribed_text"],
+                        "intent": "voice_transcription",
+                        "escalate": False,
+                        "agents_used": ["voice_agent"],
+                        "processing_time": time.time() - start_time,
+                        "products": [],
+                        "recommendations": []
+                    }
+                else:
+                    return {
+                        "success": False,
+                        "response": f"Erreur de transcription: {audio_result.get('error', 'Erreur inconnue')}",
+                        "intent": "error",
+                        "escalate": False,
+                        "agents_used": ["voice_agent"],
+                        "processing_time": time.time() - start_time,
+                        "products": [],
+                        "recommendations": []
+                    }
+            
             # Initialiser l'état de la conversation
             state = {
                 "user_message": message,
                 "session_id": session_id,
                 "user_id": (user_id if isinstance(user_id, int) and user_id is not None else 0),
+                "audio_data": audio_data,
+                "audio_format": audio_format,
+                "is_audio_message": audio_data is not None,
                 "conversation_history": [],
                 "intent": "",
                 "confidence": 0.0,

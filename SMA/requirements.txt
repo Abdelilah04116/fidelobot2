@@ -1,0 +1,39 @@
+# Dépendances principales
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+websockets==12.0
+pydantic==2.5.0
+
+# Base de données
+sqlalchemy==2.0.23
+alembic==1.13.1
+
+# Authentification
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.6
+
+# LangGraph et agents IA
+langgraph==0.0.20
+langchain==0.1.0
+langchain-google-genai==0.0.6
+google-generativeai==0.3.2
+
+# Traitement audio et transcription
+openai-whisper==20231117
+ffmpeg-python==0.2.0
+
+# Utilitaires
+python-dotenv==1.0.0
+requests==2.31.0
+aiofiles==23.2.1
+asyncio-mqtt==0.16.1
+
+# Logging et monitoring
+structlog==23.2.0
+prometheus-client==0.19.0
+
+# Tests
+pytest==7.4.3
+pytest-asyncio==0.21.1
+httpx==0.25.2

@@ -353,9 +353,7 @@ Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 
 ## 🆘 Support
 
-- **Documentation** : `/docs`
-- **Issues** : GitHub Issues
-- **Email** : support@ecommerce-chatbot.com
+- **Email** : abdelilahourti@gmail.com
 
 ## 🔮 Roadmap
 
