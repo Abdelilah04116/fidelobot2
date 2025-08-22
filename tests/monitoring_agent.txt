@@ -1,0 +1,33 @@
+# Tests pour MonitoringAgent
+# Cet agent surveille les performances du système
+
+## Statut du système
+état du système
+performances
+statut des services
+santé du système
+
+## Métriques
+métriques de performance
+statistiques
+données d'utilisation
+rapports de performance
+
+## Alertes
+alertes système
+notifications
+problèmes détectés
+anomalies
+
+## Surveillance
+surveillance en temps réel
+monitoring
+contrôle qualité
+supervision
+
+## Rapports
+rapport de performance
+analyse des données
+statistiques d'utilisation
+métriques système
+

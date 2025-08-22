@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.env
+.env
+.venv/
+venv/
+
+# VSCode/IDE
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+pgdata/
+*.db
+
+# Base de données
+catalogue.db
+
+# Environnements
+.envrc
+
+# Tests
+.coverage
+htmlcov/
+
+# Autres fichiers temporaires
+*.bak
+*.swp
+*.tmp
+
+# Node/npm (si jamais utilisé)
+node_modules/
+
+# Build
+build/
+dist/
+*.egg-info/
+
+# Docker Compose override
+.docker-compose.override.yml

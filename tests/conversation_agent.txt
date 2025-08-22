@@ -1,0 +1,21 @@
+# Tests pour ConversationAgent
+# Cet agent analyse l'intention des messages et initie le routage
+
+## Salutations
+hi
+hello
+bonjour
+salut
+hey
+
+## Demandes générales
+comment ça va ?
+que peux-tu faire ?
+aide-moi
+je ne sais pas quoi faire
+
+## Intentions vagues
+je cherche quelque chose
+j'ai besoin d'aide
+pouvez-vous m'aider ?
+

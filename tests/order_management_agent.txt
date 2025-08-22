@@ -1,0 +1,33 @@
+# Tests pour OrderManagementAgent
+# Cet agent gère les commandes et leur suivi
+
+## Statut de commande
+statut de ma commande
+où est ma commande ?
+suivi de commande
+ma commande est-elle expédiée ?
+quand vais-je recevoir ma commande ?
+
+## Historique des commandes
+mes commandes précédentes
+historique de mes achats
+commandes récentes
+toutes mes commandes
+
+## Informations de livraison
+date de livraison
+adresse de livraison
+modifier l'adresse
+changer la date de livraison
+
+## Problèmes de commande
+ma commande n'est pas arrivée
+commande en retard
+problème avec ma commande
+commande endommagée
+
+## Numéros de commande
+commande #12345
+suivi commande ABC123
+statut commande XYZ789
+

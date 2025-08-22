@@ -1,0 +1,33 @@
+# Tests pour CartManagementAgent
+# Cet agent gère le panier d'achat
+
+## Ajout au panier
+ajouter au panier
+mettre dans le panier
+ajouter ce produit
+ajouter à ma liste
+
+## Gestion du panier
+voir mon panier
+contenu du panier
+que j'ai dans mon panier
+panier d'achat
+
+## Modification du panier
+modifier la quantité
+changer la quantité
+supprimer du panier
+retirer du panier
+vider le panier
+
+## Validation du panier
+passer la commande
+finaliser l'achat
+commander
+procéder au paiement
+
+## Informations sur le panier
+prix total
+nombre d'articles
+frais de livraison
+remises applicables

@@ -1,0 +1,41 @@
+# Tests pour CustomerServiceAgent
+# Cet agent traite les demandes de service client
+
+## Problèmes généraux
+j'ai un problème
+aide-moi
+service client
+support client
+assistance
+
+## Problèmes de commande
+commande en retard
+produit défectueux
+erreur de commande
+problème de livraison
+
+## Retours et remboursements
+retourner un produit
+remboursement
+garantie
+produit cassé
+pas satisfait
+
+## Questions sur les produits
+informations produit
+caractéristiques
+spécifications techniques
+guide d'utilisation
+
+## Problèmes de compte
+problème de connexion
+mot de passe oublié
+modifier mes informations
+supprimer mon compte
+
+## Autres demandes
+horaires d'ouverture
+contact
+adresse du magasin
+politique de confidentialité
+

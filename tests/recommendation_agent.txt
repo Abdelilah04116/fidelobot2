@@ -1,0 +1,36 @@
+# Tests pour RecommendationAgent
+# Cet agent génère des recommandations personnalisées
+
+## Demandes de recommandations générales
+recommandez-moi des produits
+que me conseillez-vous ?
+suggestions de produits
+qu'est-ce qui est populaire ?
+meilleurs produits
+
+## Recommandations par type
+cadeaux pour homme
+cadeaux pour femme
+cadeaux pour enfant
+cadeaux pour anniversaire
+cadeaux de Noël
+
+## Recommandations par budget
+cadeaux pas cher
+produits de luxe
+meilleur rapport qualité-prix
+produits premium
+
+## Recommandations par intérêt
+pour les sportifs
+pour les gamers
+pour les cuisiniers
+pour les lecteurs
+pour les voyageurs
+
+## Recommandations personnalisées
+que recommandez-vous pour moi ?
+produits selon mes goûts
+suggestions personnalisées
+basé sur mes achats précédents
+

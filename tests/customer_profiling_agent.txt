@@ -1,0 +1,34 @@
+# Tests pour CustomerProfilingAgent
+# Cet agent analyse et crée des profils utilisateur
+
+## Demandes de profil
+mon profil
+mes préférences
+mes données
+informations sur moi
+mon compte
+
+## Modifications de profil
+modifier mes préférences
+changer mes goûts
+mettre à jour mon profil
+ajuster mes paramètres
+
+## Préférences
+mes centres d'intérêt
+ce que j'aime
+mes hobbies
+mes préférences d'achat
+
+## Historique
+mon historique d'achat
+mes commandes précédentes
+ce que j'ai acheté
+mes produits favoris
+
+## Personnalisation
+personnaliser mes recommandations
+produits pour moi
+suggestions personnalisées
+selon mes goûts
+

@@ -1,0 +1,33 @@
+# Tests pour SecurityAgent
+# Cet agent détecte et prévient les menaces de sécurité
+
+## Demandes de sécurité
+sécurité de mon compte
+protection des données
+sécurité en ligne
+protection de la vie privée
+
+## Problèmes de sécurité
+compte piraté
+activité suspecte
+connexion non autorisée
+tentative de fraude
+
+## Authentification
+authentification à deux facteurs
+verification en deux étapes
+sécuriser mon compte
+protection supplémentaire
+
+## Données personnelles
+mes données personnelles
+confidentialité
+protection des informations
+données sensibles
+
+## Rapports de sécurité
+rapport de sécurité
+activité de mon compte
+connexions récentes
+alertes de sécurité
+

@@ -1,0 +1,36 @@
+# Tests pour MultimodalAgent
+# Cet agent traite les contenus multimédia
+
+## Images
+analyser cette image
+décrire cette photo
+que montre cette image ?
+identifier ce produit
+recherche par image
+
+## Vidéos
+analyser cette vidéo
+décrire cette vidéo
+que montre cette vidéo ?
+extrait de vidéo
+contenu vidéo
+
+## Documents
+analyser ce document
+extraire les informations
+lire ce PDF
+contenu du document
+informations du fichier
+
+## Audio
+transcrire l'audio
+analyser l'enregistrement
+contenu audio
+voix en texte
+
+## Contenus mixtes
+contenu multimédia
+analyse complète
+tous les formats
+différents types de contenu
+

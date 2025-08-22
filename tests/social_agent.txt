@@ -1,0 +1,33 @@
+# Tests pour SocialAgent
+# Cet agent gère les interactions sociales et avis clients
+
+## Avis et commentaires
+avis clients
+commentaires
+évaluations
+notes des produits
+
+## Communauté
+communauté
+utilisateurs
+réseau social
+partage
+
+## Recommandations sociales
+recommandations d'amis
+avis de la communauté
+suggestions populaires
+tendances
+
+## Interactions sociales
+partager
+recommander
+commenter
+évaluer
+
+## Contenu communautaire
+contenu généré par les utilisateurs
+photos d'utilisateurs
+vidéos de clients
+témoignages
+

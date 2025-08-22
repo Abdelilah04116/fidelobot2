@@ -1,0 +1,39 @@
+# Tests pour ProductSearchAgent
+# Cet agent recherche et récupère des informations sur les produits
+
+## Demandes de catalogue/liste
+donner moi le catalogue
+montrez-moi vos produits
+liste des produits
+voir tous les produits
+afficher le catalogue
+
+## Recherches par catégorie
+produits électroniques
+smartphones
+ordinateurs portables
+vêtements
+chaussures
+livres
+jouets
+
+## Recherches par marque
+produits Apple
+smartphones Samsung
+Nike
+Adidas
+Sony
+
+## Recherches par prix
+produits moins de 100€
+smartphones entre 200 et 500€
+ordinateurs pas cher
+produits de luxe
+
+## Recherches spécifiques
+téléphone portable
+laptop gaming
+sneakers blanches
+livre de cuisine
+cadeau pour enfant
+

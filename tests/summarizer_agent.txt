@@ -1,0 +1,33 @@
+# Tests pour SummarizerAgent
+# Cet agent synthétise les réponses de plusieurs agents
+
+## Demandes de résumé
+résumez les informations
+synthétisez
+donnez-moi un aperçu
+résumé de la situation
+
+## Demandes de comparaison
+comparez les produits
+différences entre
+quel est le meilleur
+comparaison
+
+## Demandes d'analyse
+analysez mes options
+que recommandez-vous ?
+avis d'expert
+opinion
+
+## Demandes de conseil
+conseillez-moi
+que faire ?
+quelle option choisir ?
+aide à la décision
+
+## Demandes de clarification
+clarifiez
+expliquez-moi
+plus de détails
+précisions
+

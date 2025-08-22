@@ -1,0 +1,33 @@
+# Tests pour SustainabilityAgent
+# Cet agent propose des options écologiques et durables
+
+## Produits écologiques
+produits écologiques
+produits verts
+produits durables
+produits respectueux de l'environnement
+
+## Matériaux durables
+matériaux recyclés
+produits bio
+matériaux naturels
+produits éco-responsables
+
+## Économie d'énergie
+produits économes en énergie
+appareils basse consommation
+éclairage LED
+produits énergétiquement efficaces
+
+## Emballages
+emballages recyclables
+emballages biodégradables
+réduction des emballages
+emballages écologiques
+
+## Transport
+livraison écologique
+transport vert
+compensation carbone
+livraison durable
+

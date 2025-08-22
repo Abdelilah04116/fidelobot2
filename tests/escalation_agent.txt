@@ -1,0 +1,38 @@
+# Tests pour EscalationAgent
+# Cet agent transfère vers des agents humains
+
+## Demandes complexes
+problème très compliqué
+situation urgente
+besoin d'un humain
+parler à quelqu'un
+agent humain
+
+## Problèmes techniques
+erreur système
+bug du site
+problème technique
+ne fonctionne pas
+erreur de paiement
+
+## Demandes spéciales
+demande spéciale
+cas particulier
+exception
+dérogation
+demande personnalisée
+
+## Urgences
+urgence
+problème critique
+situation grave
+aide immédiate
+problème urgent
+
+## Demandes non standard
+demande inhabituelle
+cas complexe
+situation unique
+problème rare
+demande exceptionnelle
+

@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechShop - Votre boutique en ligne</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .pulse:hover {
+            animation: pulse 1.5s infinite;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .chatbot-container {
+            transition: all 0.3s ease;
+        }
+        
+        .chatbot-hidden {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header/Navbar -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <a href="#" class="text-2xl font-bold text-indigo-600">TechShop</a>
+                    <nav class="hidden md:flex space-x-6">
+                        <a href="#" class="text-gray-700 hover:text-indigo-600">Accueil</a>
+                        <a href="#" class="text-gray-700 hover:text-indigo-600">Boutique</a>
+                        <a href="#" class="text-gray-700 hover:text-indigo-600">Nouveautés</a>
+                        <a href="#" class="text-gray-700 hover:text-indigo-600">Promotions</a>
+                        <a href="#" class="text-gray-700 hover:text-indigo-600">Contact</a>
+                    </nav>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="relative">
+                        <input type="text" placeholder="Rechercher..." class="border rounded-full py-1 px-4 focus:outline-none focus:ring-2 focus:ring-indigo-400 w-48 md:w-64">
+                        <button class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-indigo-600">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                    <a href="#" class="text-gray-700 hover:text-indigo-600">
+                        <i class="fas fa-user text-xl"></i>
+                    </a>
+                    <a href="#" id="nav-cart" class="text-gray-700 hover:text-indigo-600 relative cursor-pointer" role="button" aria-label="Ouvrir le panier" tabindex="0">
+                        <i class="fas fa-shopping-cart text-xl"></i>
+                        <span id="cart-count" class="absolute -top-2 -right-2 bg-indigo-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                    </a>
+                    <button class="md:hidden text-gray-700 hover:text-indigo-600">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-16">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-8 md:mb-0">
+                    <h1 class="text-4xl md:text-5xl font-bold mb-4">Découvrez nos nouveaux produits</h1>
+                    <p class="text-xl mb-6">Des produits high-tech de qualité à prix imbattables. Livraison offerte dès 50€ d'achat.</p>
+                    <button class="bg-white text-indigo-600 font-bold py-3 px-8 rounded-full hover:bg-gray-100 transition duration-300">Acheter maintenant</button>
+                </div>
+                <div class="md:w-1/2 flex justify-center">
+                    <img src="https://images.unsplash.com/photo-1550009158-9ebf69173e03?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Produits high-tech" class="rounded-lg shadow-xl max-w-md">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Categories -->
+    <section class="py-12">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">Catégories populaires</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <a href="#" class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition duration-300 text-center">
+                    <div class="bg-gray-100 rounded-full h-16 w-16 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-mobile-alt text-2xl text-indigo-600"></i>
+                    </div>
+                    <h3 class="font-semibold">Smartphones</h3>
+                </a>
+                <a href="#" class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition duration-300 text-center">
+                    <div class="bg-gray-100 rounded-full h-16 w-16 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-laptop text-2xl text-indigo-600"></i>
+                    </div>
+                    <h3 class="font-semibold">Ordinateurs</h3>
+                </a>
+                <a href="#" class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition duration-300 text-center">
+                    <div class="bg-gray-100 rounded-full h-16 w-16 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-headphones text-2xl text-indigo-600"></i>
+                    </div>
+                    <h3 class="font-semibold">Audio</h3>
+                </a>
+                <a href="#" class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition duration-300 text-center">
+                    <div class="bg-gray-100 rounded-full h-16 w-16 flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-tablet-alt text-2xl text-indigo-600"></i>
+                    </div>
+                    <h3 class="font-semibold">Tablettes</h3>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Products -->
+    <section class="py-12 bg-gray-100">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-6">Produits populaires</h2>
+            <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">Découvrez notre sélection de produits les plus vendus et les mieux notés par nos clients.</p>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Product 1 -->
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden product-card transition duration-300">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1468495244123-6c6c332eeece?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="iPhone 14 Pro" class="w-full h-64 object-cover">
+                        <div class="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">-15%</div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-lg">iPhone 14 Pro</h3>
+                            <span class="text-indigo-600 font-bold">1 299€</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">Le dernier smartphone haut de gamme d'Apple</p>
+                        <div class="flex items-center mb-3">
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span class="text-gray-500 text-sm ml-2">(142 avis)</span>
+                        </div>
+                        <button class="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 transition duration-300">Ajouter au panier</button>
+                    </div>
+                </div>
+                
+                <!-- Product 2 -->
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden product-card transition duration-300">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="MacBook Pro M2" class="w-full h-64 object-cover">
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-lg">MacBook Pro M2</h3>
+                            <span class="text-indigo-600 font-bold">1 899€</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">Puissance et élégance pour les professionnels</p>
+                        <div class="flex items-center mb-3">
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <span class="text-gray-500 text-sm ml-2">(97 avis)</span>
+                        </div>
+                        <button class="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 transition duration-300">Ajouter au panier</button>
+                    </div>
+                </div>
+                
+                <!-- Product 3 -->
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden product-card transition duration-300">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1590658268037-6bf12165ee3a?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="AirPods Pro 2" class="w-full h-64 object-cover">
+                        <div class="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">Nouveau</div>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-lg">AirPods Pro 2</h3>
+                            <span class="text-indigo-600 font-bold">279€</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">Réduction de bruit active et son spatial</p>
+                        <div class="flex items-center mb-3">
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </div>
+                            <span class="text-gray-500 text-sm ml-2">(56 avis)</span>
+                        </div>
+                        <button class="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 transition duration-300">Ajouter au panier</button>
+                    </div>
+                </div>
+                
+                <!-- Product 4 -->
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden product-card transition duration-300">
+                    <div class="relative">
+                        <img src="https://images.unsplash.com/photo-1640955014217-8e7bc4e2b042?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Galaxy Watch 5" class="w-full h-64 object-cover">
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-lg">Galaxy Watch 5</h3>
+                            <span class="text-indigo-600 font-bold">329€</span>
+                        </div>
+                        <p class="text-gray-600 text-sm mb-4">Montre connectée avec suivi santé avancé</p>
+                        <div class="flex items-center mb-3">
+                            <div class="flex text-yellow-400">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span class="text-gray-500 text-sm ml-2">(84 avis)</span>
+                        </div>
+                        <button class="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 transition duration-300">Ajouter au panier</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12">
+                <a href="#" class="inline-block border-2 border-indigo-600 text-indigo-600 font-semibold px-6 py-2 rounded-md hover:bg-indigo-600 hover:text-white transition duration-300">Voir tous les produits</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Promo Banner -->
+    <section class="py-12">
+        <div class="container mx-auto px-4">
+            <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl p-8 md:p-12">
+                <div class="flex flex-col md:flex-row items-center">
+                    <div class="md:w-2/3 mb-6 md:mb-0">
+                        <h2 class="text-2xl md:text-3xl font-bold mb-4">Promotion spéciale été 2023</h2>
+                        <p class="text-lg md:text-xl mb-4">Jusqu'à -30% sur une sélection de produits high-tech. Offre valable jusqu'au 31 août.</p>
+                        <button class="bg-white text-indigo-600 font-bold py-3 px-8 rounded-full hover:bg-gray-100 transition duration-300">Voir les offres</button>
+                    </div>
+                    <div class="md:w-1/3 text-center">
+                        <div class="inline-block bg-white text-indigo-600 rounded-full p-4 animate-bounce">
+                            <i class="fas fa-percentage text-4xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="py-12 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">Ce que nos clients disent</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Testimonial 1 -->
+                <div class="bg-gray-50 rounded-xl p-6 shadow-sm">
+                    <div class="flex items-center mb-4">
+                        <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="Client 1" class="w-12 h-12 rounded-full object-cover">
+                        <div class="ml-4">
+                            <h4 class="font-bold">Marie Dubois</h4>
+                            <div class="flex text-yellow-400 text-sm">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600">"J'ai commandé un smartphone sur TechShop et j'ai été impressionnée par la rapidité de livraison et le service client impeccable."</p>
+                </div>
+                
+                <!-- Testimonial 2 -->
+                <div class="bg-gray-50 rounded-xl p-6 shadow-sm">
+                    <div class="flex items-center mb-4">
+                        <img src="https://randomuser.me/api/portraits/men/75.jpg" alt="Client 2" class="w-12 h-12 rounded-full object-cover">
+                        <div class="ml-4">
+                            <h4 class="font-bold">Thomas Martin</h4>
+                            <div class="flex text-yellow-400 text-sm">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600">"Excellente expérience d'achat. Les produits sont de qualité et conformes à la description. Je recommande vivement ce site."</p>
+                </div>
+                
+                <!-- Testimonial 3 -->
+                <div class="bg-gray-50 rounded-xl p-6 shadow-sm">
+                    <div class="flex items-center mb-4">
+                        <img src="https://randomuser.me/api/portraits/women/68.jpg" alt="Client 3" class="w-12 h-12 rounded-full object-cover">
+                        <div class="ml-4">
+                            <h4 class="font-bold">Sophie Lambert</h4>
+                            <div class="flex text-yellow-400 text-sm">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-gray-600">"J'ai eu un problème avec mon produit et le service client a été très réactif pour trouver une solution. Très professionnel."</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter -->
+    <section class="py-12 bg-gray-100">
+        <div class="container mx-auto px-4">
+            <div class="max-w-3xl mx-auto text-center">
+                <h2 class="text-3xl font-bold mb-4">Inscrivez-vous à notre newsletter</h2>
+                <p class="text-gray-600 mb-6">Recevez les dernières promotions, nouveautés et conseils directement dans votre boîte mail.</p>
+                <form class="flex flex-col sm:flex-row gap-4">
+                    <input type="email" placeholder="Votre adresse email" class="flex-grow px-4 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                    <button type="submit" class="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition duration-300">S'abonner</button>
+                </form>
+                <p class="text-sm text-gray-500 mt-4">Nous ne partagerons jamais votre email avec des tiers.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">TechShop</h3>
+                    <p class="text-gray-400">Votre boutique en ligne de produits high-tech depuis 2015. Qualité, prix et service client au rendez-vous.</p>
+                    <div class="flex space-x-4 mt-4">
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold mb-4">Boutique</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white">Smartphones</a></li>
+                        <li><a href="#" class="hover:text-white">Ordinateurs</a></li>
+                        <li><a href="#" class="hover:text-white">Tablettes</a></li>
+                        <li><a href="#" class="hover:text-white">Audio</a></li>
+                        <li><a href="#" class="hover:text-white">Accessoires</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold mb-4">Informations</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white">À propos</a></li>
+                        <li><a href="#" class="hover:text-white">Contact</a></li>
+                        <li><a href="#" class="hover:text-white">Livraison</a></li>
+                        <li><a href="#" class="hover:text-white">Retours</a></li>
+                        <li><a href="#" class="hover:text-white">Mentions légales</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="font-bold mb-4">Contact</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li class="flex items-center"><i class="fas fa-map-marker-alt mr-2"></i> 123 Rue Tech, 75000 Paris</li>
+                        <li class="flex items-center"><i class="fas fa-phone-alt mr-2"></i> +33 1 23 45 67 89</li>
+                        <li class="flex items-center"><i class="fas fa-envelope mr-2"></i> contact@techshop.fr</li>
+                        <li class="flex items-center"><i class="fas fa-clock mr-2"></i> Lundi - Vendredi: 9h - 18h</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-10 pt-6 text-center text-gray-400">
+                <p>&copy; 2023 TechShop. Tous droits réservés.</p>
+                <div class="flex justify-center space-x-6 mt-4">
+                    <img src="https://via.placeholder.com/50x30?text=VISA" alt="Visa" class="h-8">
+                    <img src="https://via.placeholder.com/50x30?text=MC" alt="Mastercard" class="h-8">
+                    <img src="https://via.placeholder.com/50x30?text=PayPal" alt="PayPal" class="h-8">
+                    <img src="https://via.placeholder.com/50x30?text=CB" alt="CB" class="h-8">
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Chatbot Button -->
+    <div class="fixed bottom-6 right-6 z-50">
+        <button id="chatbot-toggle" class="bg-indigo-600 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center pulse hover:shadow-xl">
+            <i class="fas fa-comment-dots text-2xl"></i>
+        </button>
+    </div>
+    
+    <!-- Chatbot Container -->
+    <div id="chatbot-container" class="fixed bottom-24 right-6 w-80 bg-white rounded-xl shadow-xl overflow-hidden chatbot-container chatbot-hidden">
+        <div class="bg-indigo-600 text-white p-4 flex justify-between items-center">
+            <h3 class="font-bold">Assistant TechShop</h3>
+            <button id="chatbot-close" class="text-white hover:text-gray-200">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="p-4 h-64 overflow-y-auto" id="chat-messages">
+            <div class="flex mb-4">
+                <div class="bg-indigo-100 rounded-lg p-3 text-sm max-w-xs">
+                    Bonjour ! 👋 Comment puis-je vous aider aujourd'hui ?
+                </div>
+            </div>
+        </div>
+        <div class="p-4 border-t">
+            <div class="flex">
+                <input type="text" id="chat-input" placeholder="Tapez votre message..." class="flex-grow border rounded-l-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                <button id="chat-send" class="bg-indigo-600 text-white px-4 py-2 rounded-r-lg hover:bg-indigo-700">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Sidebar -->
+    <div id="cart-sidebar" class="fixed top-0 right-0 h-full w-80 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-50">
+        <div class="flex items-center justify-between p-4 border-b">
+            <h3 class="font-bold text-lg">Votre panier</h3>
+            <button id="cart-close" class="text-gray-600 hover:text-gray-900"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="cart-content" class="p-4 space-y-2 overflow-y-auto" style="max-height: calc(100% - 56px);"></div>
+    </div>
+
+	<script>
+		// Chatbot functionality + SMA hookup
+		const chatbotToggle = document.getElementById('chatbot-toggle');
+		const chatbotContainer = document.getElementById('chatbot-container');
+		const chatbotClose = document.getElementById('chatbot-close');
+		const chatMessages = document.getElementById('chat-messages');
+		const chatInput = document.getElementById('chat-input');
+		const chatSend = document.getElementById('chat-send');
+		
+		let isChatbotOpen = false;
+		const sessionId = 'web-' + Math.random().toString(36).slice(2);
+		let ws = null;
+		
+		const wsProtocol = location.protocol === 'https:' ? 'wss' : 'ws';
+		const apiHost = location.hostname || 'localhost';
+		const apiPort = 8000;
+		const wsUrl = `${wsProtocol}://${apiHost}:${apiPort}/ws/${sessionId}`;
+		const restProtocol = wsProtocol === 'wss' ? 'https' : 'http';
+		const restUrl = `${restProtocol}://${apiHost}:${apiPort}/chat`;
+		
+		function ensureWsConnected() {
+			if (ws && ws.readyState === WebSocket.OPEN) return;
+			try {
+				ws = new WebSocket(wsUrl);
+				ws.onopen = () => {};
+				ws.onmessage = (event) => {
+					try {
+						const data = JSON.parse(event.data);
+						handleBotEvent(data);
+					} catch (e) {
+						console.error('WS parse error', e);
+					}
+				};
+				ws.onclose = () => {};
+				ws.onerror = () => {};
+			} catch (e) {
+				console.error('WS connection error', e);
+			}
+		}
+		
+		function showTyping() {
+			const existing = document.getElementById('typing-indicator');
+			if (existing) return;
+			const div = document.createElement('div');
+			div.classList.add('flex', 'mb-4');
+			div.id = 'typing-indicator';
+			div.innerHTML = `
+				<div class="bg-indigo-100 rounded-lg p-3 text-sm max-w-xs">
+					L'assistant réfléchit...
+				</div>`;
+			chatMessages.appendChild(div);
+			chatMessages.scrollTop = chatMessages.scrollHeight;
+		}
+		
+		function hideTyping() {
+			const el = document.getElementById('typing-indicator');
+			if (el) el.remove();
+		}
+		
+		function addMessage(content, isUser = false) {
+			const messageDiv = document.createElement('div');
+			messageDiv.classList.add('flex', 'mb-4');
+			
+			if (isUser) {
+				messageDiv.classList.add('justify-end');
+				messageDiv.innerHTML = `
+					<div class="bg-indigo-600 text-white rounded-lg p-3 text-sm max-w-xs">
+						${content}
+					</div>
+				`;
+			} else {
+				messageDiv.innerHTML = `
+					<div class="bg-indigo-100 rounded-lg p-3 text-sm max-w-xs">
+						${content}
+					</div>
+				`;
+			}
+			
+			chatMessages.appendChild(messageDiv);
+			chatMessages.scrollTop = chatMessages.scrollHeight;
+		}
+		
+		function renderProducts(products = []) {
+			if (!products.length) return;
+			const wrapper = document.createElement('div');
+			wrapper.className = 'flex mb-4';
+			let content = '<div class="bg-white rounded-lg p-3 text-sm max-w-xs w-full">';
+			content += '<div class="grid grid-cols-1 gap-2">';
+			products.slice(0, 5).forEach(p => {
+				content += `
+					<div class="border rounded p-2">
+						<div class="font-semibold">${p.name || 'Produit'}</div>
+						<div class="text-indigo-600 font-bold">${p.price ?? ''}${p.price ? '€' : ''}</div>
+						<div class="text-gray-600 text-xs">${(p.description || '').toString().slice(0, 80)}${(p.description || '').length > 80 ? '…' : ''}</div>
+					</div>`;
+			});
+			content += '</div></div>';
+			wrapper.innerHTML = content;
+			chatMessages.appendChild(wrapper);
+			chatMessages.scrollTop = chatMessages.scrollHeight;
+		}
+		
+		function handleBotEvent(data) {
+			if (!data) return;
+			if (data.type === 'typing') {
+				showTyping();
+				return;
+			}
+			if (data.type === 'response') {
+				hideTyping();
+				addMessage(data.message || '');
+				if (data.products && data.products.length) {
+					renderProducts(data.products);
+				}
+				return;
+			}
+			// Fallback pour la réponse REST (ChatResponse)
+			if (typeof data.response === 'string') {
+				hideTyping();
+				addMessage(data.response);
+				if (data.products && data.products.length) {
+					renderProducts(data.products);
+				}
+			}
+		}
+		
+		async function sendViaRest(message) {
+			try {
+				const res = await fetch(restUrl, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ message, session_id: sessionId })
+				});
+				const data = await res.json();
+				handleBotEvent(data);
+			} catch (e) {
+				console.error('REST error', e);
+				addMessage("Désolé, le service est momentanément indisponible.");
+			}
+		}
+		
+		function sendUserMessage(message) {
+			addMessage(message, true);
+			showTyping();
+			if (ws && ws.readyState === WebSocket.OPEN) {
+				ws.send(JSON.stringify({ message }));
+			} else {
+				sendViaRest(message);
+			}
+		}
+		
+		chatbotToggle.addEventListener('click', () => {
+			isChatbotOpen = !isChatbotOpen;
+			if (isChatbotOpen) {
+				chatbotContainer.classList.remove('chatbot-hidden');
+				ensureWsConnected();
+			} else {
+				chatbotContainer.classList.add('chatbot-hidden');
+			}
+		});
+		
+		chatbotClose.addEventListener('click', () => {
+			isChatbotOpen = false;
+			chatbotContainer.classList.add('chatbot-hidden');
+		});
+		
+		chatSend.addEventListener('click', () => {
+			const message = chatInput.value.trim();
+			if (message) {
+				chatInput.value = '';
+				sendUserMessage(message);
+			}
+		});
+		
+		chatInput.addEventListener('keypress', (e) => {
+			if (e.key === 'Enter') {
+				chatSend.click();
+			}
+		});
+
+        const navCart = document.getElementById('nav-cart');
+        const cartSidebar = document.getElementById('cart-sidebar');
+        const cartClose = document.getElementById('cart-close');
+        const cartContent = document.getElementById('cart-content');
+        const cartCount = document.getElementById('cart-count');
+
+        // Fallbacks si la première balise <script> n'a pas initialisé ces variables en global
+        if (!window.sessionId) {
+            window.sessionId = 'web-' + Math.random().toString(36).slice(2);
+        }
+        if (!window.ws) {
+            try { window.ws = null; } catch (e) {}
+        }
+
+        function openCart() {
+            cartSidebar.classList.remove('translate-x-full');
+        }
+        function closeCart() {
+            cartSidebar.classList.add('translate-x-full');
+        }
+        function renderCartPanel(cart) {
+            try {
+                const items = (cart && cart.items) ? cart.items : [];
+                const totalItems = cart && cart.total_items ? cart.total_items : 0;
+                const totalPrice = cart && cart.total_price ? cart.total_price : 0;
+                if (cartCount) cartCount.textContent = totalItems || 0;
+                let html = '';
+                if (!items.length) {
+                    html += '<div class="text-gray-600">Votre panier est vide.</div>';
+                } else {
+                    items.forEach(it => {
+                        html += `<div class="cart-item flex justify-between border-b py-2">
+                                    <div class="text-sm">
+                                        <div class="font-semibold">${it.name}</div>
+                                        <div class="text-gray-500">x${it.quantity}</div>
+                                    </div>
+                                    <div class="text-sm font-semibold">${it.total}€</div>
+                                 </div>`;
+                    });
+                    html += `<div class="flex justify-between py-3 font-bold">
+                                <span>Total</span>
+                                <span>${totalPrice}€</span>
+                             </div>`;
+                }
+                cartContent.innerHTML = html;
+            } catch (e) {
+                cartContent.innerHTML = '<div class="text-red-600">Erreur lors du chargement du panier.</div>';
+            }
+        }
+        async function fetchCartViaRest() {
+            try {
+                const res = await fetch(`${location.protocol}//${location.host}/chat`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: 'voir mon panier', session_id: window.sessionId })
+                });
+                const data = await res.json();
+                if (data && data.cart) {
+                    renderCartPanel(data.cart);
+                } else {
+                    renderCartPanel({ items: [], total_items: 0, total_price: 0 });
+                }
+            } catch (e) {
+                renderCartPanel({ items: [], total_items: 0, total_price: 0 });
+            }
+        }
+        function requestCart() {
+            try {
+                if (window.ws && window.ws.readyState === WebSocket.OPEN) {
+                    const handler = (event) => {
+                        try {
+                            const data = JSON.parse(event.data);
+                            if (data && data.type === 'response') {
+                                if (data.cart) renderCartPanel(data.cart);
+                                window.ws.removeEventListener('message', handler);
+                            }
+                        } catch {}
+                    };
+                    window.ws.addEventListener('message', handler);
+                    window.ws.send(JSON.stringify({ message: 'voir mon panier' }));
+                } else {
+                    if (typeof ensureWsConnected === 'function') {
+                        ensureWsConnected();
+                        // léger délai pour laisser le WS s'ouvrir
+                        setTimeout(() => fetchCartViaRest(), 300);
+                    } else {
+                        fetchCartViaRest();
+                    }
+                }
+            } catch (e) {
+                fetchCartViaRest();
+            }
+        }
+        if (navCart) {
+            const openAndLoad = (e) => { e.preventDefault(); openCart(); requestCart(); };
+            navCart.addEventListener('click', openAndLoad);
+            navCart.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') openAndLoad(e); });
+        }
+        if (cartClose) {
+            cartClose.addEventListener('click', (e) => { e.preventDefault(); closeCart(); });
+        }
+	</script>
+</body>
+</html>

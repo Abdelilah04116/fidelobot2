@@ -1,0 +1,33 @@
+# Tests pour GDPRAgent
+# Cet agent assure la conformité RGPD
+
+## Demandes RGPD
+mes droits RGPD
+suppression de mes données
+export de mes données
+consentement
+
+## Gestion des données
+supprimer mes données
+exporter mes informations
+mes données personnelles
+accès à mes données
+
+## Consentement
+modifier mes consentements
+retirer mon consentement
+gérer mes préférences
+autorisations
+
+## Droits utilisateur
+droit à l'oubli
+droit de rectification
+droit d'accès
+droit de portabilité
+
+## Politique de confidentialité
+politique de confidentialité
+comment mes données sont utilisées
+protection de la vie privée
+règlementation
+
