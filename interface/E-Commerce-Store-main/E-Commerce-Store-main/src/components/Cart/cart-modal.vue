@@ -18,7 +18,7 @@ const cartStore = useCartStore()
 				data-test="cart-background"
 			></div>
 			<div
-				class="relative mt-16 flex h-full max-h-[80%] w-11/12 max-w-[32rem] flex-col items-center rounded-lg bg-white opacity-100 lg:absolute lg:right-10 lg:top-10 lg:mt-0 lg:w-1/3"
+				class="relative mt-16 flex h-full max-h-[80%] w-11/12 max-w-[32rem] flex-col items-center rounded-lg bg-white opacity-100 lg:absolute lg:left-10 lg:top-10 lg:mt-0 lg:w-1/3"
 			>
 				<button
 					@click="cartStore.cartOff()"

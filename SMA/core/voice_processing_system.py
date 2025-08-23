@@ -1,537 +1,400 @@
 """
-Système de traitement vocal complet pour Fidelo
-- Speech-to-Text avec Google Speech Recognition
-- Text-to-Speech avec gTTS
-- Support français/anglais/arabe
-- Conversion WebM→WAV avec ffmpeg
-- Extraction d'intention basique
+Système de traitement vocal pour le SMA
+Gère la reconnaissance vocale, synthèse vocale et extraction d'intention
 """
 
 import asyncio
+import base64
 import json
 import logging
-import tempfile
+import os
 import subprocess
+import tempfile
 from pathlib import Path
-from typing import Dict, Any, Optional, List, Tuple
-import base64
-import io
+from typing import Dict, Any, Optional, List
+import time
 
-# Speech Recognition
-import speech_recognition as sr
+# Imports pour la reconnaissance vocale
+try:
+    import speech_recognition as sr
+    SPEECH_RECOGNITION_AVAILABLE = True
+except ImportError:
+    SPEECH_RECOGNITION_AVAILABLE = False
+    logging.warning("speech_recognition non disponible")
 
-# Text-to-Speech
-from gtts import gTTS
-from gtts.lang import tts_langs
+# Imports pour la synthèse vocale
+try:
+    from gtts import gTTS
+    GTTS_AVAILABLE = True
+except ImportError:
+    GTTS_AVAILABLE = False
+    logging.warning("gTTS non disponible")
 
-# Audio processing
-from pydub import AudioSegment
-from pydub.playback import play
-
-# Fallback TTS
-import pyttsx3
+try:
+    import pyttsx3
+    PYTTSX3_AVAILABLE = True
+except ImportError:
+    PYTTSX3_AVAILABLE = False
+    logging.warning("pyttsx3 non disponible")
 
 logger = logging.getLogger(__name__)
 
 class VoiceProcessingSystem:
-    """
-    Système complet de traitement vocal avec support multilingue
-    """
+    """Système de traitement vocal complet"""
     
     def __init__(self):
-        self.recognizer = sr.Recognizer()
-        self.supported_languages = {
-            'fr': 'french',
-            'en': 'english', 
-            'ar': 'arabic'
-        }
-        
-        # Configuration des langues gTTS
-        self.tts_languages = {
-            'fr': 'fr',
-            'en': 'en',
-            'ar': 'ar'
-        }
-        
-        # Fallback TTS engine
-        self.fallback_tts = pyttsx3.init()
-        self.fallback_tts.setProperty('rate', 150)
-        
-        # Vérifier ffmpeg
+        self.recognizer = sr.Recognizer() if SPEECH_RECOGNITION_AVAILABLE else None
         self.ffmpeg_available = self._check_ffmpeg()
-        if not self.ffmpeg_available:
-            logger.warning("FFmpeg non disponible. Certaines fonctionnalités audio peuvent ne pas fonctionner.")
-        
-        # Dossier temporaire pour les fichiers audio
-        self.temp_dir = Path(tempfile.gettempdir()) / "fidelo_voice"
+        self.temp_dir = Path(tempfile.gettempdir()) / "fidelo_audio"
         self.temp_dir.mkdir(exist_ok=True)
         
-        logger.info("Système de traitement vocal initialisé")
+        # Configuration des langues supportées
+        self.supported_languages = {
+            "fr": "fr-FR",
+            "en": "en-US", 
+            "ar": "ar-SA"
+        }
+        
+        # Patterns d'intention pour l'extraction
+        self.intent_patterns = {
+            "product_search": [
+                "cherche", "recherche", "trouve", "montre", "affiche",
+                "search", "find", "show", "display",
+                "ابحث", "اعثر", "أظهر", "عرض"
+            ],
+            "add_to_cart": [
+                "ajoute", "mets", "ajouter", "panier", "cart",
+                "add", "put", "cart", "basket",
+                "أضف", "ضع", "سلة", "عربة"
+            ],
+            "order_status": [
+                "commande", "statut", "livraison", "suivi",
+                "order", "status", "delivery", "tracking",
+                "طلب", "حالة", "توصيل", "تتبع"
+            ],
+            "help": [
+                "aide", "help", "support", "assistance",
+                "help", "support", "assist",
+                "مساعدة", "دعم", "مساعدة"
+            ]
+        }
+        
+        logger.info("VoiceProcessingSystem initialisé")
     
     def _check_ffmpeg(self) -> bool:
-        """Vérifier si ffmpeg est installé"""
+        """Vérifier si FFmpeg est disponible"""
         try:
-            result = subprocess.run(['ffmpeg', '-version'], 
-                                  capture_output=True, text=True, timeout=5)
-            return result.returncode == 0
-        except (subprocess.TimeoutExpired, FileNotFoundError, subprocess.SubprocessError):
+            subprocess.run(["ffmpeg", "-version"], capture_output=True, check=True)
+            return True
+        except (subprocess.CalledProcessError, FileNotFoundError):
             return False
     
-    async def process_voice_message(self, audio_data: bytes, audio_format: str = "webm", 
-                                  source_language: str = "fr") -> Dict[str, Any]:
-        """
-        Traiter un message vocal complet : transcription + extraction d'intention
+    def get_capabilities(self) -> Dict[str, Any]:
+        """Retourner les capacités du système"""
+        return {
+            "system": "VoiceProcessingSystem",
+            "capabilities": [
+                "speech_to_text",
+                "text_to_speech", 
+                "intent_extraction",
+                "audio_conversion",
+                "multilingual_support"
+            ],
+            "ffmpeg_available": self.ffmpeg_available,
+            "speech_recognition_available": SPEECH_RECOGNITION_AVAILABLE,
+            "gtts_available": GTTS_AVAILABLE,
+            "pyttsx3_available": PYTTSX3_AVAILABLE,
+            "languages": list(self.supported_languages.keys())
+        }
+    
+    def get_supported_languages(self) -> List[str]:
+        """Retourner les langues supportées"""
+        return list(self.supported_languages.keys())
+    
+    def validate_audio_file(self, audio_data: bytes, format: str) -> bool:
+        """Valider un fichier audio"""
+        if not audio_data:
+            return False
         
-        Args:
-            audio_data: Données audio brutes
-            audio_format: Format de l'audio (webm, mp3, wav, etc.)
-            source_language: Langue source pour la transcription
-            
-        Returns:
-            Dict avec transcription, intention, et métadonnées
-        """
+        # Vérifier la taille (max 10MB)
+        if len(audio_data) > 10 * 1024 * 1024:
+            return False
+        
+        # Vérifier le format
+        supported_formats = ['webm', 'mp3', 'wav', 'm4a', 'ogg']
+        if format.lower() not in supported_formats:
+            return False
+        
+        return True
+    
+    async def _convert_to_wav(self, audio_data: bytes, source_format: str) -> Optional[bytes]:
+        """Convertir l'audio vers WAV avec FFmpeg"""
+        if not self.ffmpeg_available:
+            logger.warning("FFmpeg non disponible pour la conversion")
+            return None
+        
         try:
-            # Valider le fichier audio
+            # Créer des fichiers temporaires
+            input_file = self.temp_dir / f"input.{source_format}"
+            output_file = self.temp_dir / "output.wav"
+            
+            # Écrire les données audio
+            with open(input_file, "wb") as f:
+                f.write(audio_data)
+            
+            # Convertir avec FFmpeg
+            cmd = [
+                "ffmpeg", "-i", str(input_file),
+                "-acodec", "pcm_s16le",
+                "-ar", "16000",
+                "-ac", "1",
+                "-y", str(output_file)
+            ]
+            
+            result = subprocess.run(cmd, capture_output=True, check=True)
+            
+            # Lire le fichier converti
+            with open(output_file, "rb") as f:
+                wav_data = f.read()
+            
+            # Nettoyer les fichiers temporaires
+            input_file.unlink(missing_ok=True)
+            output_file.unlink(missing_ok=True)
+            
+            return wav_data
+            
+        except Exception as e:
+            logger.error(f"Erreur conversion audio: {e}")
+            return None
+    
+    async def transcribe_audio(self, audio_data: bytes, audio_format: str = "wav", language: str = "fr") -> Dict[str, Any]:
+        """Transcrire l'audio en texte"""
+        start_time = time.time()
+        
+        try:
+            if not SPEECH_RECOGNITION_AVAILABLE:
+                return {
+                    "success": False,
+                    "error": "Speech recognition non disponible",
+                    "transcribed_text": "",
+                    "confidence": 0.0
+                }
+            
+            # Valider l'audio
             if not self.validate_audio_file(audio_data, audio_format):
                 return {
                     "success": False,
                     "error": "Fichier audio invalide",
                     "transcribed_text": "",
-                    "intent": None,
                     "confidence": 0.0
                 }
             
-            # Transcrire l'audio
-            transcription_result = await self.transcribe_audio(audio_data, audio_format, source_language)
+            # Convertir vers WAV si nécessaire
+            if audio_format.lower() != "wav":
+                wav_data = await self._convert_to_wav(audio_data, audio_format)
+                if wav_data is None:
+                    return {
+                        "success": False,
+                        "error": "Impossible de convertir l'audio",
+                        "transcribed_text": "",
+                        "confidence": 0.0
+                    }
+                audio_data = wav_data
             
-            if not transcription_result["success"]:
-                return transcription_result
+            # Créer un fichier temporaire pour la reconnaissance
+            temp_file = self.temp_dir / "temp_audio.wav"
+            with open(temp_file, "wb") as f:
+                f.write(audio_data)
             
-            transcribed_text = transcription_result["transcribed_text"]
-            
-            # Extraire l'intention
-            intent_result = self._extract_intent(transcribed_text, source_language)
-            
-            return {
-                "success": True,
-                "transcribed_text": transcribed_text,
-                "intent": intent_result["intent"],
-                "confidence": transcription_result["confidence"],
-                "language": transcription_result["language"],
-                "entities": intent_result["entities"],
-                "processing_time": transcription_result.get("processing_time", 0)
-            }
-            
-        except Exception as e:
-            logger.error(f"Erreur lors du traitement vocal: {e}")
-            return {
-                "success": False,
-                "error": str(e),
-                "transcribed_text": "",
-                "intent": None,
-                "confidence": 0.0
-            }
-    
-    async def transcribe_audio(self, audio_data: bytes, audio_format: str = "webm", 
-                             language: str = "fr") -> Dict[str, Any]:
-        """
-        Transcrire l'audio en texte avec Google Speech Recognition
-        
-        Args:
-            audio_data: Données audio brutes
-            audio_format: Format de l'audio
-            language: Langue pour la transcription
-            
-        Returns:
-            Dict avec le texte transcrit et métadonnées
-        """
-        try:
-            import time
-            start_time = time.time()
-            
-            # Convertir l'audio en WAV si nécessaire
-            wav_data = await self._convert_to_wav(audio_data, audio_format)
-            
-            if not wav_data:
-                return {
-                    "success": False,
-                    "error": "Impossible de convertir l'audio en WAV",
-                    "transcribed_text": "",
-                    "confidence": 0.0
-                }
-            
-            # Créer un fichier audio temporaire
-            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
-                temp_file.write(wav_data)
-                temp_file_path = temp_file.name
-            
-            try:
-                # Charger l'audio avec speech_recognition
-                with sr.AudioFile(temp_file_path) as source:
-                    audio = self.recognizer.record(source)
+            # Transcrire avec Google Speech Recognition
+            with sr.AudioFile(str(temp_file)) as source:
+                audio = self.recognizer.record(source)
                 
-                # Configurer la reconnaissance selon la langue
-                language_code = self.supported_languages.get(language, 'fr-FR')
+                # Obtenir la langue pour la reconnaissance
+                lang_code = self.supported_languages.get(language, "fr-FR")
                 
-                # Transcrire avec Google Speech Recognition
-                text = self.recognizer.recognize_google(
-                    audio, 
-                    language=language_code,
-                    show_all=False
+                result = self.recognizer.recognize_google(
+                    audio,
+                    language=lang_code,
+                    show_all=True
                 )
-                
-                processing_time = time.time() - start_time
+            
+            # Nettoyer le fichier temporaire
+            temp_file.unlink(missing_ok=True)
+            
+            if result and 'alternative' in result:
+                # Prendre la première alternative (la plus probable)
+                transcribed_text = result['alternative'][0]['transcript']
+                confidence = result['alternative'][0].get('confidence', 0.8)
                 
                 return {
                     "success": True,
-                    "transcribed_text": text.strip(),
-                    "confidence": 0.9,  # Google ne retourne pas de confidence
+                    "transcribed_text": transcribed_text,
+                    "confidence": confidence,
                     "language": language,
-                    "processing_time": processing_time
+                    "processing_time": time.time() - start_time
                 }
-                
-            finally:
-                # Nettoyer le fichier temporaire
-                Path(temp_file_path).unlink(mode='ignore_errors')
+            else:
+                return {
+                    "success": False,
+                    "error": "Aucun texte reconnu",
+                    "transcribed_text": "",
+                    "confidence": 0.0,
+                    "processing_time": time.time() - start_time
+                }
                 
         except sr.UnknownValueError:
             return {
                 "success": False,
                 "error": "Audio non reconnu ou trop silencieux",
                 "transcribed_text": "",
-                "confidence": 0.0
+                "confidence": 0.0,
+                "processing_time": time.time() - start_time
             }
         except sr.RequestError as e:
             return {
                 "success": False,
-                "error": f"Erreur de service de reconnaissance: {e}",
+                "error": f"Erreur service reconnaissance: {e}",
                 "transcribed_text": "",
-                "confidence": 0.0
+                "confidence": 0.0,
+                "processing_time": time.time() - start_time
             }
         except Exception as e:
-            logger.error(f"Erreur lors de la transcription: {e}")
+            logger.error(f"Erreur transcription: {e}")
             return {
                 "success": False,
                 "error": str(e),
                 "transcribed_text": "",
-                "confidence": 0.0
+                "confidence": 0.0,
+                "processing_time": time.time() - start_time
             }
     
-    async def generate_speech(self, text: str, language: str = "fr", 
-                            output_format: str = "wav") -> Dict[str, Any]:
-        """
-        Générer de la parole à partir de texte avec gTTS
+    async def generate_speech(self, text: str, language: str = "fr", output_format: str = "wav") -> Dict[str, Any]:
+        """Générer de la parole à partir de texte"""
+        start_time = time.time()
         
-        Args:
-            text: Texte à convertir en parole
-            language: Langue pour la synthèse vocale
-            output_format: Format de sortie (wav, mp3)
-            
-        Returns:
-            Dict avec les données audio et métadonnées
-        """
         try:
-            # Valider la langue
-            if language not in self.tts_languages:
-                language = "fr"  # Fallback
-            
-            tts_lang = self.tts_languages[language]
-            
-            # Créer un fichier temporaire pour gTTS
-            with tempfile.NamedTemporaryFile(suffix=f".{output_format}", delete=False) as temp_file:
-                temp_file_path = temp_file.name
-            
-            try:
-                # Générer la parole avec gTTS
-                tts = gTTS(text=text, lang=tts_lang, slow=False)
-                tts.save(temp_file_path)
-                
-                # Lire le fichier généré
-                with open(temp_file_path, 'rb') as f:
-                    audio_data = f.read()
-                
-                # Convertir en base64 si nécessaire
-                audio_base64 = base64.b64encode(audio_data).decode('utf-8')
-                
-                return {
-                    "success": True,
-                    "audio_data": audio_base64,
-                    "audio_format": output_format,
-                    "text_length": len(text),
-                    "language": language
-                }
-                
-            finally:
-                # Nettoyer le fichier temporaire
-                Path(temp_file_path).unlink(mode='ignore_errors')
-                
-        except Exception as e:
-            logger.error(f"Erreur lors de la génération vocale: {e}")
-            
-            # Fallback avec pyttsx3
-            try:
-                return await self._fallback_tts(text, language, output_format)
-            except Exception as fallback_error:
-                logger.error(f"Erreur fallback TTS: {fallback_error}")
+            if not text.strip():
                 return {
                     "success": False,
-                    "error": str(e),
+                    "error": "Texte vide",
                     "audio_data": None,
                     "audio_format": output_format
                 }
-    
-    async def _fallback_tts(self, text: str, language: str, output_format: str) -> Dict[str, Any]:
-        """Fallback TTS avec pyttsx3"""
-        try:
-            # Configurer la voix selon la langue
-            voices = self.fallback_tts.getProperty('voices')
             
-            # Chercher une voix appropriée
-            for voice in voices:
-                if language in voice.languages[0].lower() if voice.languages else "":
-                    self.fallback_tts.setProperty('voice', voice.id)
-                    break
+            # Essayer d'abord avec gTTS
+            if GTTS_AVAILABLE:
+                try:
+                    tts = gTTS(text=text, lang=language, slow=False)
+                    
+                    # Créer un fichier temporaire
+                    temp_file = self.temp_dir / f"temp_speech.{output_format}"
+                    tts.save(str(temp_file))
+                    
+                    # Lire le fichier généré
+                    with open(temp_file, "rb") as f:
+                        audio_data = f.read()
+                    
+                    # Nettoyer
+                    temp_file.unlink(missing_ok=True)
+                    
+                    return {
+                        "success": True,
+                        "audio_data": base64.b64encode(audio_data).decode(),
+                        "audio_format": output_format,
+                        "text_length": len(text),
+                        "language": language,
+                        "processing_time": time.time() - start_time
+                    }
+                    
+                except Exception as e:
+                    logger.warning(f"gTTS échoué: {e}")
             
-            # Créer un fichier temporaire
-            with tempfile.NamedTemporaryFile(suffix=f".{output_format}", delete=False) as temp_file:
-                temp_file_path = temp_file.name
+            # Fallback avec pyttsx3
+            if PYTTSX3_AVAILABLE:
+                try:
+                    engine = pyttsx3.init()
+                    
+                    # Configurer la voix selon la langue
+                    voices = engine.getProperty('voices')
+                    for voice in voices:
+                        if language in voice.languages[0].lower():
+                            engine.setProperty('voice', voice.id)
+                            break
+                    
+                    # Créer un fichier temporaire
+                    temp_file = self.temp_dir / f"temp_speech.{output_format}"
+                    engine.save_to_file(text, str(temp_file))
+                    engine.runAndWait()
+                    
+                    # Lire le fichier généré
+                    with open(temp_file, "rb") as f:
+                        audio_data = f.read()
+                    
+                    # Nettoyer
+                    temp_file.unlink(missing_ok=True)
+                    
+                    return {
+                        "success": True,
+                        "audio_data": base64.b64encode(audio_data).decode(),
+                        "audio_format": output_format,
+                        "text_length": len(text),
+                        "language": language,
+                        "processing_time": time.time() - start_time
+                    }
+                    
+                except Exception as e:
+                    logger.warning(f"pyttsx3 échoué: {e}")
             
-            try:
-                # Sauvegarder l'audio
-                self.fallback_tts.save_to_file(text, temp_file_path)
-                self.fallback_tts.runAndWait()
-                
-                # Lire le fichier
-                with open(temp_file_path, 'rb') as f:
-                    audio_data = f.read()
-                
-                audio_base64 = base64.b64encode(audio_data).decode('utf-8')
-                
-                return {
-                    "success": True,
-                    "audio_data": audio_base64,
-                    "audio_format": output_format,
-                    "text_length": len(text),
-                    "language": language,
-                    "method": "fallback_tts"
-                }
-                
-            finally:
-                Path(temp_file_path).unlink(mode='ignore_errors')
-                
+            return {
+                "success": False,
+                "error": "Aucun service de synthèse vocale disponible",
+                "audio_data": None,
+                "audio_format": output_format,
+                "processing_time": time.time() - start_time
+            }
+            
         except Exception as e:
-            logger.error(f"Erreur fallback TTS: {e}")
+            logger.error(f"Erreur synthèse vocale: {e}")
             return {
                 "success": False,
                 "error": str(e),
                 "audio_data": None,
-                "audio_format": output_format
+                "audio_format": output_format,
+                "processing_time": time.time() - start_time
             }
     
-    def validate_audio_file(self, audio_data: bytes, audio_format: str) -> bool:
-        """
-        Valider un fichier audio
-        
-        Args:
-            audio_data: Données audio
-            audio_format: Format de l'audio
-            
-        Returns:
-            True si le fichier est valide
-        """
-        try:
-            # Vérifier la taille minimale (100 bytes)
-            if len(audio_data) < 100:
-                return False
-            
-            # Vérifier le format supporté
-            supported_formats = ['webm', 'mp3', 'wav', 'm4a', 'ogg']
-            if audio_format.lower() not in supported_formats:
-                return False
-            
-            # Vérifier les headers de fichier
-            if audio_format.lower() == 'webm':
-                return audio_data.startswith(b'\x1a\x45\xdf\xa3')
-            elif audio_format.lower() == 'mp3':
-                return audio_data.startswith(b'\xff\xfb') or audio_data.startswith(b'ID3')
-            elif audio_format.lower() == 'wav':
-                return audio_data.startswith(b'RIFF')
-            
-            return True
-            
-        except Exception as e:
-            logger.error(f"Erreur validation audio: {e}")
-            return False
-    
-    async def _convert_to_wav(self, audio_data: bytes, source_format: str) -> Optional[bytes]:
-        """
-        Convertir l'audio en format WAV avec ffmpeg
-        
-        Args:
-            audio_data: Données audio source
-            source_format: Format source
-            
-        Returns:
-            Données audio en WAV ou None si erreur
-        """
-        try:
-            if not self.ffmpeg_available:
-                # Fallback avec pydub si possible
-                return await self._convert_with_pydub(audio_data, source_format)
-            
-            # Créer des fichiers temporaires
-            with tempfile.NamedTemporaryFile(suffix=f".{source_format}", delete=False) as input_file:
-                input_file.write(audio_data)
-                input_path = input_file.name
-            
-            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as output_file:
-                output_path = output_file.name
-            
-            try:
-                # Commande ffmpeg
-                cmd = [
-                    'ffmpeg',
-                    '-i', input_path,
-                    '-acodec', 'pcm_s16le',
-                    '-ar', '16000',
-                    '-ac', '1',
-                    '-y',  # Écraser le fichier de sortie
-                    output_path
-                ]
-                
-                process = await asyncio.create_subprocess_exec(
-                    *cmd,
-                    stdout=asyncio.subprocess.PIPE,
-                    stderr=asyncio.subprocess.PIPE
-                )
-                
-                stdout, stderr = await process.communicate()
-                
-                if process.returncode == 0:
-                    # Lire le fichier WAV généré
-                    with open(output_path, 'rb') as f:
-                        wav_data = f.read()
-                    return wav_data
-                else:
-                    logger.error(f"Erreur ffmpeg: {stderr.decode()}")
-                    return None
-                    
-            finally:
-                # Nettoyer les fichiers temporaires
-                Path(input_path).unlink(mode='ignore_errors')
-                Path(output_path).unlink(mode='ignore_errors')
-                
-        except Exception as e:
-            logger.error(f"Erreur conversion audio: {e}")
-            return None
-    
-    async def _convert_with_pydub(self, audio_data: bytes, source_format: str) -> Optional[bytes]:
-        """Conversion avec pydub comme fallback"""
-        try:
-            # Créer un buffer audio
-            audio_buffer = io.BytesIO(audio_data)
-            
-            # Charger l'audio avec pydub
-            if source_format.lower() == 'webm':
-                audio = AudioSegment.from_file(audio_buffer, format="webm")
-            elif source_format.lower() == 'mp3':
-                audio = AudioSegment.from_file(audio_buffer, format="mp3")
-            else:
-                audio = AudioSegment.from_file(audio_buffer, format=source_format)
-            
-            # Convertir en WAV
-            wav_buffer = io.BytesIO()
-            audio.export(wav_buffer, format="wav", parameters=["-ar", "16000", "-ac", "1"])
-            
-            return wav_buffer.getvalue()
-            
-        except Exception as e:
-            logger.error(f"Erreur conversion pydub: {e}")
-            return None
-    
     def _extract_intent(self, text: str, language: str = "fr") -> Dict[str, Any]:
-        """
-        Extraire l'intention basique du texte
-        
-        Args:
-            text: Texte à analyser
-            language: Langue du texte
-            
-        Returns:
-            Dict avec intention et entités
-        """
+        """Extraire l'intention d'un texte"""
         try:
             text_lower = text.lower().strip()
             
-            # Intentions basiques en français
-            if language == "fr":
-                intents = {
-                    "recherche_produit": ["cherche", "trouve", "recherche", "veux", "je veux", "j'ai besoin"],
-                    "ajouter_panier": ["ajoute", "ajouter", "mets", "mettez", "commande"],
-                    "voir_panier": ["panier", "mon panier", "voir panier", "affiche panier"],
-                    "supprimer_produit": ["supprime", "enlève", "retire", "annule"],
-                    "prix": ["prix", "coût", "combien", "tarif"],
-                    "aide": ["aide", "help", "assistance", "comment"],
-                    "salutation": ["bonjour", "salut", "hello", "bonsoir"],
-                    "au_revoir": ["au revoir", "bye", "à bientôt", "merci"]
-                }
-            elif language == "en":
-                intents = {
-                    "search_product": ["search", "find", "look for", "want", "need"],
-                    "add_cart": ["add", "put", "order", "buy"],
-                    "view_cart": ["cart", "my cart", "show cart", "basket"],
-                    "remove_product": ["remove", "delete", "cancel"],
-                    "price": ["price", "cost", "how much", "cost"],
-                    "help": ["help", "assistance", "how"],
-                    "greeting": ["hello", "hi", "good morning", "good evening"],
-                    "goodbye": ["goodbye", "bye", "see you", "thank you"]
-                }
-            elif language == "ar":
-                intents = {
-                    "search_product": ["ابحث", "أريد", "أحتاج", "ابحث عن"],
-                    "add_cart": ["أضف", "اشتر", "اطلب"],
-                    "view_cart": ["سلة", "عربة", "مشترياتي"],
-                    "help": ["مساعدة", "كيف", "ساعدني"],
-                    "greeting": ["مرحبا", "أهلا", "صباح الخير"],
-                    "goodbye": ["وداعا", "مع السلامة", "شكرا"]
-                }
-            else:
-                intents = {}
+            # Chercher des patterns d'intention
+            for intent, patterns in self.intent_patterns.items():
+                for pattern in patterns:
+                    if pattern.lower() in text_lower:
+                        # Calculer un score de confiance basique
+                        confidence = min(0.9, 0.5 + (len(pattern) / len(text)) * 0.4)
+                        
+                        # Extraire des entités basiques
+                        entities = []
+                        words = text_lower.split()
+                        for word in words:
+                            if len(word) > 3 and word not in patterns:
+                                entities.append(word)
+                        
+                        return {
+                            "intent": intent,
+                            "confidence": confidence,
+                            "entities": entities[:5],  # Limiter à 5 entités
+                            "language": language
+                        }
             
-            # Détecter l'intention
-            detected_intent = "unknown"
-            confidence = 0.0
-            entities = []
-            
-            for intent, keywords in intents.items():
-                for keyword in keywords:
-                    if keyword in text_lower:
-                        detected_intent = intent
-                        confidence = 0.8
-                        break
-                if detected_intent != "unknown":
-                    break
-            
-            # Extraction d'entités basique (mots après les mots-clés)
-            for intent, keywords in intents.items():
-                for keyword in keywords:
-                    if keyword in text_lower:
-                        # Extraire le texte après le mot-clé
-                        parts = text_lower.split(keyword, 1)
-                        if len(parts) > 1:
-                            entity_text = parts[1].strip()
-                            if entity_text:
-                                entities.append({
-                                    "type": "product_name",
-                                    "value": entity_text,
-                                    "confidence": 0.7
-                                })
-                        break
-            
+            # Intention par défaut
             return {
-                "intent": detected_intent,
-                "confidence": confidence,
-                "entities": entities,
+                "intent": "general_inquiry",
+                "confidence": 0.3,
+                "entities": [],
                 "language": language
             }
             
@@ -544,26 +407,55 @@ class VoiceProcessingSystem:
                 "language": language
             }
     
-    def get_supported_languages(self) -> Dict[str, Any]:
-        """Retourner les langues supportées"""
-        return {
-            "speech_recognition": list(self.supported_languages.keys()),
-            "text_to_speech": list(self.tts_languages.keys()),
-            "intent_extraction": ["fr", "en", "ar"]
-        }
-    
-    def get_capabilities(self) -> Dict[str, Any]:
-        """Retourner les capacités du système"""
-        return {
-            "system": "voice_processing",
-            "capabilities": [
-                "speech_to_text",
-                "text_to_speech", 
-                "intent_extraction",
-                "audio_conversion",
-                "multilingual_support"
-            ],
-            "supported_formats": ["webm", "mp3", "wav", "m4a", "ogg"],
-            "ffmpeg_available": self.ffmpeg_available,
-            "languages": self.get_supported_languages()
-        }
+    async def process_voice_message(self, audio_data: bytes, audio_format: str = "webm", source_language: str = "fr") -> Dict[str, Any]:
+        """Traiter un message vocal complet (transcription + intention)"""
+        start_time = time.time()
+        
+        try:
+            # Transcrire l'audio
+            transcription_result = await self.transcribe_audio(
+                audio_data=audio_data,
+                audio_format=audio_format,
+                language=source_language
+            )
+            
+            if not transcription_result["success"]:
+                return {
+                    "success": False,
+                    "error": transcription_result["error"],
+                    "transcribed_text": "",
+                    "confidence": 0.0,
+                    "language": source_language,
+                    "intent": "unknown",
+                    "entities": [],
+                    "processing_time": time.time() - start_time
+                }
+            
+            # Extraire l'intention du texte transcrit
+            intent_result = self._extract_intent(
+                transcription_result["transcribed_text"],
+                source_language
+            )
+            
+            return {
+                "success": True,
+                "transcribed_text": transcription_result["transcribed_text"],
+                "confidence": transcription_result["confidence"],
+                "language": transcription_result["language"],
+                "intent": intent_result["intent"],
+                "entities": intent_result["entities"],
+                "processing_time": time.time() - start_time
+            }
+            
+        except Exception as e:
+            logger.error(f"Erreur traitement message vocal: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "transcribed_text": "",
+                "confidence": 0.0,
+                "language": source_language,
+                "intent": "unknown",
+                "entities": [],
+                "processing_time": time.time() - start_time
+            }

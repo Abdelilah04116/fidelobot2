@@ -1,21 +1,20 @@
 # orchestrator.py
 from langgraph.graph import StateGraph, END
-from langgraph.graph import CompiledGraph
 from typing import Dict, Any, List, TypedDict, Annotated
 from typing_extensions import TypedDict
 import operator
 import asyncio
 
 # Importation des agents
-from SMA.agents.conversation_agent import ConversationAgent
-from SMA.agents.product_search_agent import ProductSearchAgent
-from SMA.agents.recommendation_agent import RecommendationAgent
-from SMA.agents.customer_profiling_agent import CustomerProfilingAgent
-from SMA.agents.summarizer_agent import SummarizerAgent
-from SMA.agents.escalation_agent import EscalationAgent
-from SMA.agents.order_management_agent import OrderManagementAgent
-from SMA.agents.cart_management_agent import CartManagementAgent
-from SMA.agents.voice_agent import VoiceAgent
+from ..agents.conversation_agent import ConversationAgent
+from ..agents.product_search_agent import ProductSearchAgent
+from ..agents.recommendation_agent import RecommendationAgent
+from ..agents.customer_profiling_agent import CustomerProfilingAgent
+from ..agents.summarizer_agent import SummarizerAgent
+from ..agents.escalation_agent import EscalationAgent
+from ..agents.order_management_agent import OrderManagementAgent
+from ..agents.cart_management_agent import CartManagementAgent
+from ..agents.voice_agent import VoiceAgent
 
 class ChatState(TypedDict):
     """État partagé entre tous les agents"""
@@ -72,7 +71,7 @@ class ChatBotOrchestrator:
         
         self.graph = self._build_graph()
     
-    def _build_graph(self) -> CompiledGraph:
+    def _build_graph(self):
         """Construire le graphe de workflow LangGraph"""
         workflow = StateGraph(ChatState)
         
@@ -329,13 +328,6 @@ class ChatBotOrchestrator:
     
     async def _final_response_node(self, state: ChatState) -> ChatState:
         """Nœud de finalisation de la réponse"""
-        # Ajouter des métadonnées finales
-        state.update({
-            "processing_complete": True,
-            "agents_count": len(state.get("agents_used", [])),
-            "final_intent": state.get("intent", "unknown")
-        })
-        
         # Log de la conversation
         await self._log_conversation(state)
         

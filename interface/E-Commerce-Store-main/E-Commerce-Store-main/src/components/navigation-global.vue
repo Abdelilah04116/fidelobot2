@@ -39,6 +39,7 @@ function hideHamburger(): void {
 		<div
 			class="relative flex w-4/5 max-w-6xl flex-row items-center justify-between border-b border-zinc-500 py-6 md:w-11/12 lg:w-4/5"
 		>
+			<!-- Hamburger menu (mobile) -->
 			<button
 				id="hamburger"
 				class="select-none lg:hidden"
@@ -60,6 +61,30 @@ function hideHamburger(): void {
 					/>
 				</svg>
 			</button>
+
+			<!-- Panier à gauche du logo -->
+			<div
+				class="relative h-5 cursor-pointer mr-4"
+				@click="cartStore.cartOn()"
+				data-test="cart-button"
+			>
+				<img
+					class="h-full hover:opacity-50 active:translate-y-0.5"
+					:src="cartIcon"
+					alt=""
+				/>
+				<Transition>
+					<div
+						v-show="cartStore.cartLength !== 0"
+						class="absolute -right-2 top-3 flex h-4 w-4 flex-col items-center justify-center rounded-full bg-red-600 text-xs font-black transition-all duration-300"
+						data-test="cart-bubble"
+					>
+						{{ cartStore.cartLength }}
+					</div>
+				</Transition>
+			</div>
+
+			<!-- Logo -->
 			<router-link
 				to="/"
 				class="text-3xl font-extrabold tracking-tight antialiased transition duration-300 hover:scale-110 hover:text-k-main"
@@ -68,6 +93,7 @@ function hideHamburger(): void {
 				KIIIBS
 			</router-link>
 
+			<!-- Menu principal -->
 			<nav class="hidden tracking-widest lg:flex lg:gap-8">
 				<router-link
 					to="/"
@@ -94,26 +120,6 @@ function hideHamburger(): void {
 					>Deskmats
 				</router-link>
 			</nav>
-			<div
-				class="relative h-5 cursor-pointer"
-				@click="cartStore.cartOn()"
-				data-test="cart-button"
-			>
-				<img
-					class="h-full hover:opacity-50 active:translate-y-0.5"
-					:src="cartIcon"
-					alt=""
-				/>
-				<Transition>
-					<div
-						v-show="cartStore.cartLength !== 0"
-						class="absolute -right-2 top-3 flex h-4 w-4 flex-col items-center justify-center rounded-full bg-red-600 text-xs font-black transition-all duration-300"
-						data-test="cart-bubble"
-					>
-						{{ cartStore.cartLength }}
-					</div>
-				</Transition>
-			</div>
 		</div>
 		<Cart v-show="cartStore.showCart" />
 		<transition>

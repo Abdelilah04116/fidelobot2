@@ -121,7 +121,7 @@ async def chat_endpoint(request: ChatMessage):
                 raise HTTPException(status_code=400, detail="Format audio invalide")
         
         # Traiter le message
-    result = await chatbot_orchestrator.process_message(
+        result = await chatbot_orchestrator.process_message(
             message=request.message,
             session_id=request.session_id,
             user_id=request.user_id,
@@ -213,8 +213,8 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str, user_id: Opt
             
             if result.get("success"):
                 await manager.send_message(session_id, {
-                "type": "response",
-                "message": result["response"],
+                    "type": "response",
+                    "message": result["response"],
                     "intent": result.get("intent"),
                     "products": result.get("products", []),
                     "cart": result.get("cart", {}),
@@ -224,7 +224,7 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str, user_id: Opt
                 await manager.send_message(session_id, {
                     "type": "error",
                     "message": result.get("response", "Une erreur s'est produite"),
-                "timestamp": datetime.utcnow().isoformat()
+                    "timestamp": datetime.utcnow().isoformat()
                 })
             
     except WebSocketDisconnect:
@@ -232,11 +232,11 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str, user_id: Opt
     except Exception as e:
         logger.error(f"Erreur WebSocket: {e}")
         try:
-        await manager.send_message(session_id, {
-            "type": "error",
+            await manager.send_message(session_id, {
+                "type": "error",
                 "message": "Erreur de connexion",
-            "timestamp": datetime.utcnow().isoformat()
-        })
+                "timestamp": datetime.utcnow().isoformat()
+            })
         except:
             pass
         manager.disconnect(session_id)

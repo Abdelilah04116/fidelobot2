@@ -2757,3 +2757,698 @@ class MultimodalAgent(BaseAgent):
 
             return {"error": str(e)}
 
+
+                colors = image_analysis.get("colors", [])
+
+                if colors:
+
+                    for color in colors:
+
+                        search_criteria.append(f"description LIKE '%{color}%'")
+
+                
+
+                # Recherche par style
+
+                style = image_analysis.get("style", "")
+
+                if style:
+
+                    search_criteria.append(f"description LIKE '%{style}%'")
+
+                
+
+                # Recherche par marque
+
+                brand = image_analysis.get("brand_detected", "")
+
+                if brand:
+
+                    search_criteria.append(f"brand LIKE '%{brand}%'")
+
+                
+
+                # Construire la requête SQL
+
+                if search_criteria:
+
+                    query_string = " OR ".join(search_criteria)
+
+                    products = db.query(Product).filter(
+
+                        Product.is_active == True,
+
+                        Product.stock_quantity > 0
+
+                    ).filter(query_string).limit(limit).all()
+
+                else:
+
+                    # Recherche par défaut si aucune analyse
+
+                    products = db.query(Product).filter(
+
+                        Product.is_active == True,
+
+                        Product.stock_quantity > 0
+
+                    ).order_by(Product.rating.desc()).limit(limit).all()
+
+                
+
+                # Formater les résultats
+
+                search_results = []
+
+                for product in products:
+
+                    relevance_score = self._calculate_visual_relevance(product, image_analysis)
+
+                    search_results.append({
+
+                        "id": product.id,
+
+                        "name": product.name,
+
+                        "description": product.description,
+
+                        "price": product.price,
+
+                        "image_url": product.image_url,
+
+                        "relevance_score": round(relevance_score, 2),
+
+                        "match_reasons": self._get_match_reasons(product, image_analysis)
+
+                    })
+
+                
+
+                # Trier par pertinence
+
+                search_results.sort(key=lambda x: x["relevance_score"], reverse=True)
+
+                
+
+                return {
+
+                    "search_results": search_results,
+
+                    "total_found": len(search_results),
+
+                    "search_criteria": {
+
+                        "objects": objects,
+
+                        "colors": colors,
+
+                        "style": style,
+
+                        "brand": brand
+
+                    },
+
+                    "visual_search_quality": "high" if search_results else "low"
+
+                }
+
+                
+
+            finally:
+
+                db.close()
+
+                
+
+        except Exception as e:
+
+            self.logger.error(f"Erreur recherche visuelle: {str(e)}")
+
+            return {"error": str(e)}
+
+    
+
+    def _calculate_visual_relevance(self, product: Any, image_analysis: Dict[str, Any]) -> float:
+
+        """Calculer la pertinence visuelle d'un produit"""
+
+        try:
+
+            score = 0.0
+
+            
+
+            # Score par objets
+
+            objects = image_analysis.get("objects", [])
+
+            for obj in objects:
+
+                if obj.lower() in product.name.lower() or obj.lower() in product.description.lower():
+
+                    score += 0.3
+
+            
+
+            # Score par couleur
+
+            colors = image_analysis.get("colors", [])
+
+            for color in colors:
+
+                if color.lower() in product.description.lower():
+
+                    score += 0.2
+
+            
+
+            # Score par style
+
+            style = image_analysis.get("style", "")
+
+            if style and style.lower() in product.description.lower():
+
+                score += 0.25
+
+            
+
+            # Score par marque
+
+            brand = image_analysis.get("brand_detected", "")
+
+            if brand and hasattr(product, 'brand') and brand.lower() in product.brand.lower():
+
+                score += 0.25
+
+            
+
+            return min(score, 1.0)
+
+            
+
+        except Exception:
+
+            return 0.0
+
+    
+
+    def _get_match_reasons(self, product: Any, image_analysis: Dict[str, Any]) -> List[str]:
+
+        """Obtenir les raisons de correspondance"""
+
+        reasons = []
+
+        
+
+        try:
+
+            objects = image_analysis.get("objects", [])
+
+            for obj in objects:
+
+                if obj.lower() in product.name.lower() or obj.lower() in product.description.lower():
+
+                    reasons.append(f"Correspondance avec l'objet: {obj}")
+
+            
+
+            colors = image_analysis.get("colors", [])
+
+            for color in colors:
+
+                if color.lower() in product.description.lower():
+
+                    reasons.append(f"Correspondance de couleur: {color}")
+
+            
+
+            style = image_analysis.get("style", "")
+
+            if style and style.lower() in product.description.lower():
+
+                reasons.append(f"Style similaire: {style}")
+
+            
+
+            brand = image_analysis.get("brand_detected", "")
+
+            if brand and hasattr(product, 'brand') and brand.lower() in product.brand.lower():
+
+                reasons.append(f"Marque détectée: {brand}")
+
+            
+
+        except Exception:
+
+            reasons.append("Correspondance générale")
+
+        
+
+        return reasons[:3]  # Limiter à 3 raisons
+
+    
+
+    async def process_video_input_safe(self, state: Dict[str, Any]) -> Dict[str, Any]:
+
+        """Traiter une entrée vidéo de manière sécurisée"""
+
+        try:
+
+            video_data = state.get("video_data", "")
+
+            video_format = state.get("video_format", "mp4")
+
+            user_id = state.get("user_id")
+
+            
+
+            if not video_data:
+
+                return {"error": "Données vidéo manquantes"}
+
+            
+
+            if video_format not in self.supported_media_types["video"]:
+
+                return {"error": f"Format vidéo non supporté: {video_format}"}
+
+            
+
+            # Analyser la vidéo (en production, utiliser un service de vidéo AI)
+
+            video_analysis = await self._analyze_video_content(video_data, video_format)
+
+            
+
+            # Générer des recommandations basées sur la vidéo
+
+            video_recommendations = await self._generate_video_recommendations(video_analysis, user_id)
+
+            
+
+            return {
+
+                "success": True,
+
+                "original_video": {
+
+                    "format": video_format,
+
+                    "size_bytes": len(video_data),
+
+                    "duration_estimated": "15-30 secondes"  # Estimation
+
+                },
+
+                "video_analysis": video_analysis,
+
+                "recommendations": video_recommendations,
+
+                "accessibility": {
+
+                    "video_description": video_analysis.get("description", ""),
+
+                    "subtitles_available": True,
+
+                    "audio_description": False
+
+                }
+
+            }
+
+            
+
+        except Exception as e:
+
+            self.logger.error(f"Erreur traitement vidéo: {str(e)}")
+
+            return {"error": str(e)}
+
+    
+
+    async def _analyze_video_content(self, video_data: str, video_format: str) -> Dict[str, Any]:
+
+        """Analyser le contenu d'une vidéo"""
+
+        try:
+
+            # En production, utiliser un service comme Google Video Intelligence, Azure Video Indexer, etc.
+
+            # Ici on simule l'analyse avec des patterns courants
+
+            
+
+            # Simuler différents types de vidéos
+
+            simulated_analyses = [
+
+                {
+
+                    "type": "product_demo",
+
+                    "objects": ["smartphone", "main", "écran"],
+
+                    "actions": ["défilement", "tap", "swipe"],
+
+                    "duration": "20 secondes",
+
+                    "description": "Démonstration d'un smartphone avec navigation tactile"
+
+                },
+
+                {
+
+                    "type": "unboxing",
+
+                    "objects": ["boîte", "produit", "accessoires"],
+
+                    "actions": ["ouverture", "extraction", "présentation"],
+
+                    "duration": "45 secondes",
+
+                    "description": "Déballage d'un produit avec présentation des accessoires"
+
+                },
+
+                {
+
+                    "type": "tutorial",
+
+                    "objects": ["produit", "personne", "outils"],
+
+                    "actions": ["explication", "démonstration", "instruction"],
+
+                    "duration": "2 minutes",
+
+                    "description": "Tutoriel d'utilisation d'un produit"
+
+                }
+
+            ]
+
+            
+
+            # Retourner une analyse simulée basée sur la taille des données
+
+            data_size = len(video_data)
+
+            analysis_index = (data_size % len(simulated_analyses))
+
+            
+
+            return simulated_analyses[analysis_index]
+
+            
+
+        except Exception:
+
+            return {
+
+                "type": "unknown",
+
+                "objects": [],
+
+                "actions": [],
+
+                "duration": "unknown",
+
+                "description": "Vidéo non analysable"
+
+            }
+
+    
+
+    async def _generate_video_recommendations(self, video_analysis: Dict[str, Any], user_id: int) -> Dict[str, Any]:
+
+        """Générer des recommandations basées sur l'analyse vidéo"""
+
+        try:
+
+            video_type = video_analysis.get("type", "")
+
+            objects = video_analysis.get("objects", [])
+
+            
+
+            recommendations = {
+
+                "related_products": [],
+
+                "tutorials": [],
+
+                "accessories": [],
+
+                "similar_videos": []
+
+            }
+
+            
+
+            # Recommandations selon le type de vidéo
+
+            if video_type == "product_demo":
+
+                recommendations["related_products"] = [
+
+                    "Produits similaires",
+
+                    "Accessoires compatibles",
+
+                    "Versions plus récentes"
+
+                ]
+
+                recommendations["tutorials"] = [
+
+                    "Guide d'utilisation complet",
+
+                    "Astuces et conseils",
+
+                    "Dépannage"
+
+                ]
+
+            elif video_type == "unboxing":
+
+                recommendations["accessories"] = [
+
+                    "Accessoires inclus",
+
+                    "Accessoires recommandés",
+
+                    "Protection et transport"
+
+                ]
+
+            elif video_type == "tutorial":
+
+                recommendations["tutorials"] = [
+
+                    "Tutoriels avancés",
+
+                    "Formation complète",
+
+                    "Support technique"
+
+                ]
+
+            
+
+            return recommendations
+
+            
+
+        except Exception as e:
+
+            self.logger.error(f"Erreur génération recommandations vidéo: {str(e)}")
+
+            return {"error": str(e)}
+
+    
+
+    async def generate_voice_response_safe(self, state: Dict[str, Any]) -> Dict[str, Any]:
+
+        """Générer une réponse vocale à partir de texte"""
+
+        try:
+
+            text = state.get("text", "")
+
+            voice_style = state.get("voice_style", "neutral")
+
+            language = state.get("language", "fr")
+
+            
+
+            if not text:
+
+                return {"error": "Texte requis pour la synthèse vocale"}
+
+            
+
+            # En production, utiliser un service TTS comme Google Text-to-Speech, Azure Speech, etc.
+
+            # Ici on simule la génération vocale
+
+            
+
+            voice_response = {
+
+                "text": text,
+
+                "audio_generated": True,
+
+                "format": "mp3",
+
+                "duration_estimated": f"{len(text.split()) * 0.5:.1f} secondes",
+
+                "voice_style": voice_style,
+
+                "language": language,
+
+                "accessibility": {
+
+                    "speed_adjustable": True,
+
+                    "pitch_adjustable": True,
+
+                    "volume_control": True
+
+                }
+
+            }
+
+            
+
+            return voice_response
+
+            
+
+        except Exception as e:
+
+            self.logger.error(f"Erreur génération réponse vocale: {str(e)}")
+
+            return {"error": str(e)}
+
+    
+
+    async def get_accessibility_features_safe(self, state: Dict[str, Any]) -> Dict[str, Any]:
+
+        """Obtenir les fonctionnalités d'accessibilité disponibles"""
+
+        try:
+
+            user_id = state.get("user_id")
+
+            accessibility_needs = state.get("accessibility_needs", [])
+
+            
+
+            # Fonctionnalités d'accessibilité disponibles
+
+            accessibility_features = {
+
+                "voice_commands": {
+
+                    "enabled": True,
+
+                    "languages": ["français", "anglais", "espagnol"],
+
+                    "commands": ["rechercher", "naviguer", "commander", "aider"]
+
+                },
+
+                "text_to_speech": {
+
+                    "enabled": True,
+
+                    "voices": ["homme", "femme", "enfant"],
+
+                    "speed": ["lent", "normal", "rapide"]
+
+                },
+
+                "screen_reader": {
+
+                    "enabled": True,
+
+                    "compatibility": ["NVDA", "JAWS", "VoiceOver", "TalkBack"],
+
+                    "features": ["navigation", "description", "contraste"]
+
+                },
+
+                "visual_aids": {
+
+                    "high_contrast": True,
+
+                    "large_text": True,
+
+                    "color_blind_friendly": True,
+
+                    "font_options": ["Arial", "Verdana", "OpenDyslexic"]
+
+                },
+
+                "navigation_assistance": {
+
+                    "keyboard_only": True,
+
+                    "voice_navigation": True,
+
+                    "gesture_support": True,
+
+                    "simplified_interface": True
+
+                }
+
+            }
+
+            
+
+            # Personnaliser selon les besoins
+
+            if "visual_impairment" in accessibility_needs:
+
+                accessibility_features["voice_commands"]["priority"] = "high"
+
+                accessibility_features["text_to_speech"]["priority"] = "high"
+
+            
+
+            if "motor_impairment" in accessibility_needs:
+
+                accessibility_features["voice_commands"]["priority"] = "high"
+
+                accessibility_features["navigation_assistance"]["keyboard_only"] = True
+
+            
+
+            if "hearing_impairment" in accessibility_needs:
+
+                accessibility_features["visual_aids"]["priority"] = "high"
+
+                accessibility_features["text_to_speech"]["enabled"] = False
+
+            
+
+            return {
+
+                "accessibility_features": accessibility_features,
+
+                "personalized": len(accessibility_needs) > 0,
+
+                "compliance": "WCAG 2.1 AA",
+
+                "support_contact": "accessibilite@fidelobot.com"
+
+            }
+
+            
+
+        except Exception as e:
+
+            self.logger.error(f"Erreur fonctionnalités accessibilité: {str(e)}")
+
+            return {"error": str(e)}
+
