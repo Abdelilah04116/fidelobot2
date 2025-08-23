@@ -1,6 +1,7 @@
 """
 Agent de traitement vocal pour le SMA
 Gère la réception d'audio, conversion ffmpeg, et transcription voix->texte
+Utilise le nouveau système de traitement vocal avec Google Speech Recognition
 """
 
 import asyncio
@@ -13,15 +14,8 @@ from typing import Dict, Any, Optional
 from pathlib import Path
 import base64
 
-# Pour la transcription (Whisper ou alternative)
-try:
-    import whisper
-    WHISPER_AVAILABLE = True
-except ImportError:
-    WHISPER_AVAILABLE = False
-    logging.warning("Whisper non disponible. Utilisation d'un service de transcription alternatif.")
-
 from .base_agent import BaseAgent
+from ..core.voice_processing_system import VoiceProcessingSystem
 
 logger = logging.getLogger(__name__)
 
@@ -30,31 +24,23 @@ class VoiceAgent(BaseAgent):
     
     def __init__(self):
         super().__init__("voice_agent", "Agent de traitement vocal et transcription audio")
+        
+        # Initialiser le système de traitement vocal
+        self.voice_system = VoiceProcessingSystem()
+        
+        # Capacités de l'agent
         self.supported_formats = ['.webm', '.mp3', '.wav', '.m4a', '.ogg']
         self.temp_dir = Path(tempfile.gettempdir()) / "fidelo_audio"
         self.temp_dir.mkdir(exist_ok=True)
         
-        # Vérifier ffmpeg
-        self.ffmpeg_available = self._check_ffmpeg()
-        if not self.ffmpeg_available:
-            logger.error("FFmpeg non disponible. L'agent voix ne peut pas fonctionner.")
-        
-        # Initialiser Whisper si disponible
-        if WHISPER_AVAILABLE:
-            try:
-                self.whisper_model = whisper.load_model("base")
-                logger.info("Modèle Whisper chargé avec succès")
-            except Exception as e:
-                logger.error(f"Erreur lors du chargement de Whisper: {e}")
-                self.whisper_model = None
-        else:
-            self.whisper_model = None
+        logger.info("VoiceAgent initialisé avec le système de traitement vocal")
     
     def get_system_prompt(self) -> str:
         """Retourne le prompt système pour l'agent voix"""
         return """Tu es un agent spécialisé dans le traitement vocal et la transcription audio.
-Tu utilises ffmpeg pour convertir l'audio et Whisper pour la transcription.
-Tu ne génères pas de réponses textuelles, tu traites uniquement l'audio."""
+Tu utilises Google Speech Recognition pour la transcription et gTTS pour la synthèse vocale.
+Tu supportes le français, l'anglais et l'arabe.
+Tu extrais aussi les intentions basiques des messages vocaux."""
     
     async def execute(self, state: Dict[str, Any]) -> Dict[str, Any]:
         """Exécute la logique principale de l'agent voix"""
@@ -62,6 +48,7 @@ Tu ne génères pas de réponses textuelles, tu traites uniquement l'audio."""
             # Vérifier si on a des données audio
             audio_data = state.get("audio_data")
             audio_format = state.get("audio_format", "webm")
+            source_language = state.get("source_language", "fr")
             
             if not audio_data:
                 return {
@@ -70,14 +57,20 @@ Tu ne génères pas de réponses textuelles, tu traites uniquement l'audio."""
                     "transcribed_text": ""
                 }
             
-            # Traiter l'audio
-            result = await self.process_audio(audio_data, audio_format)
+            # Traiter l'audio avec le nouveau système
+            result = await self.voice_system.process_voice_message(
+                audio_data=audio_data,
+                audio_format=audio_format,
+                source_language=source_language
+            )
             
             return {
                 "success": result["success"],
                 "transcribed_text": result.get("transcribed_text", ""),
                 "confidence": result.get("confidence", 0.0),
-                "language": result.get("language", "unknown"),
+                "language": result.get("language", source_language),
+                "intent": result.get("intent"),
+                "entities": result.get("entities", []),
                 "error": result.get("error", "")
             }
             
@@ -89,18 +82,10 @@ Tu ne génères pas de réponses textuelles, tu traites uniquement l'audio."""
                 "transcribed_text": ""
             }
     
-    def _check_ffmpeg(self) -> bool:
-        """Vérifier si ffmpeg est installé et accessible"""
-        try:
-            result = subprocess.run(['ffmpeg', '-version'], 
-                                  capture_output=True, text=True, timeout=5)
-            return result.returncode == 0
-        except (subprocess.TimeoutExpired, FileNotFoundError, subprocess.SubprocessError):
-            return False
-    
     async def process_audio(self, audio_data: bytes, format: str = "webm") -> Dict[str, Any]:
         """
         Traiter l'audio reçu et le convertir en texte
+        Utilise le nouveau système de traitement vocal
         
         Args:
             audio_data: Données audio brutes
@@ -110,38 +95,14 @@ Tu ne génères pas de réponses textuelles, tu traites uniquement l'audio."""
             Dict contenant le texte transcrit et les métadonnées
         """
         try:
-            if not self.ffmpeg_available:
-                return {
-                    "success": False,
-                    "error": "FFmpeg non disponible",
-                    "transcribed_text": ""
-                }
+            # Utiliser le système de traitement vocal
+            result = await self.voice_system.process_voice_message(
+                audio_data=audio_data,
+                audio_format=format,
+                source_language="fr"  # Langue par défaut
+            )
             
-            # Créer un fichier temporaire pour l'audio
-            temp_audio = self.temp_dir / f"input_{self._generate_id()}.{format}"
-            temp_wav = self.temp_dir / f"converted_{self._generate_id()}.wav"
-            
-            # Sauvegarder l'audio reçu
-            with open(temp_audio, 'wb') as f:
-                f.write(audio_data)
-            
-            # Convertir avec ffmpeg
-            conversion_success = await self._convert_audio(temp_audio, temp_wav)
-            
-            if not conversion_success:
-                return {
-                    "success": False,
-                    "error": "Erreur lors de la conversion audio",
-                    "transcribed_text": ""
-                }
-            
-            # Transcrire l'audio
-            transcription_result = await self._transcribe_audio(temp_wav)
-            
-            # Nettoyer les fichiers temporaires
-            self._cleanup_files([temp_audio, temp_wav])
-            
-            return transcription_result
+            return result
             
         except Exception as e:
             logger.error(f"Erreur lors du traitement audio: {e}")
@@ -151,91 +112,84 @@ Tu ne génères pas de réponses textuelles, tu traites uniquement l'audio."""
                 "transcribed_text": ""
             }
     
-    async def _convert_audio(self, input_file: Path, output_file: Path) -> bool:
+    async def transcribe_audio(self, audio_data: bytes, format: str = "webm", language: str = "fr") -> Dict[str, Any]:
         """
-        Convertir l'audio en format WAV avec ffmpeg
+        Transcrire l'audio en texte avec Google Speech Recognition
+        
+        Args:
+            audio_data: Données audio brutes
+            format: Format de l'audio
+            language: Langue pour la transcription
+            
+        Returns:
+            Dict avec le texte transcrit et métadonnées
         """
         try:
-            cmd = [
-                'ffmpeg',
-                '-i', str(input_file),
-                '-acodec', 'pcm_s16le',
-                '-ar', '16000',
-                '-ac', '1',
-                '-y',  # Écraser le fichier de sortie
-                str(output_file)
-            ]
-            
-            process = await asyncio.create_subprocess_exec(
-                *cmd,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
+            return await self.voice_system.transcribe_audio(
+                audio_data=audio_data,
+                audio_format=format,
+                language=language
             )
             
-            stdout, stderr = await process.communicate()
-            
-            if process.returncode == 0:
-                logger.info(f"Conversion audio réussie: {input_file} -> {output_file}")
-                return True
-            else:
-                logger.error(f"Erreur conversion ffmpeg: {stderr.decode()}")
-                return False
-                
-        except Exception as e:
-            logger.error(f"Erreur lors de la conversion audio: {e}")
-            return False
-    
-    async def _transcribe_audio(self, audio_file: Path) -> Dict[str, Any]:
-        """
-        Transcrire l'audio en texte
-        """
-        try:
-            if self.whisper_model:
-                # Utiliser Whisper local
-                result = self.whisper_model.transcribe(str(audio_file))
-                transcribed_text = result["text"].strip()
-                
-                return {
-                    "success": True,
-                    "transcribed_text": transcribed_text,
-                    "confidence": result.get("confidence", 0.0),
-                    "language": result.get("language", "unknown"),
-                    "method": "whisper_local"
-                }
-            else:
-                # Fallback: simulation de transcription
-                # En production, utiliser un service comme Google Speech-to-Text, Azure, etc.
-                await asyncio.sleep(1)  # Simuler le temps de traitement
-                
-                return {
-                    "success": True,
-                    "transcribed_text": "[Texte transcrit simulé - configurez Whisper ou un service de transcription]",
-                    "confidence": 0.8,
-                    "language": "fr",
-                    "method": "simulation"
-                }
-                
         except Exception as e:
             logger.error(f"Erreur lors de la transcription: {e}")
             return {
                 "success": False,
                 "error": str(e),
-                "transcribed_text": ""
+                "transcribed_text": "",
+                "confidence": 0.0
             }
     
-    def _generate_id(self) -> str:
-        """Générer un ID unique pour les fichiers temporaires"""
-        import uuid
-        return str(uuid.uuid4())[:8]
+    async def generate_speech(self, text: str, language: str = "fr", output_format: str = "wav") -> Dict[str, Any]:
+        """
+        Générer de la parole à partir de texte avec gTTS
+        
+        Args:
+            text: Texte à convertir en parole
+            language: Langue pour la synthèse vocale
+            output_format: Format de sortie (wav, mp3)
+            
+        Returns:
+            Dict avec les données audio et métadonnées
+        """
+        try:
+            return await self.voice_system.generate_speech(
+                text=text,
+                language=language,
+                output_format=output_format
+            )
+            
+        except Exception as e:
+            logger.error(f"Erreur lors de la génération vocale: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "audio_data": None,
+                "audio_format": output_format
+            }
     
-    def _cleanup_files(self, files: list):
-        """Nettoyer les fichiers temporaires"""
-        for file_path in files:
-            try:
-                if file_path.exists():
-                    file_path.unlink()
-            except Exception as e:
-                logger.warning(f"Impossible de supprimer {file_path}: {e}")
+    def extract_intent(self, text: str, language: str = "fr") -> Dict[str, Any]:
+        """
+        Extraire l'intention d'un texte
+        
+        Args:
+            text: Texte à analyser
+            language: Langue du texte
+            
+        Returns:
+            Dict avec intention et entités
+        """
+        try:
+            return self.voice_system._extract_intent(text, language)
+            
+        except Exception as e:
+            logger.error(f"Erreur extraction intention: {e}")
+            return {
+                "intent": "unknown",
+                "confidence": 0.0,
+                "entities": [],
+                "language": language
+            }
     
     async def handle_message(self, message: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -246,6 +200,7 @@ Tu ne génères pas de réponses textuelles, tu traites uniquement l'audio."""
                 # Extraire les données audio
                 audio_data = message.get("audio_data")
                 format = message.get("format", "webm")
+                language = message.get("language", "fr")
                 
                 if not audio_data:
                     return {
@@ -267,15 +222,21 @@ Tu ne génères pas de réponses textuelles, tu traites uniquement l'audio."""
                 else:
                     audio_bytes = audio_data
                 
-                # Traiter l'audio
-                result = await self.process_audio(audio_bytes, format)
+                # Traiter l'audio avec le nouveau système
+                result = await self.voice_system.process_voice_message(
+                    audio_data=audio_bytes,
+                    audio_format=format,
+                    source_language=language
+                )
                 
                 return {
                     "agent": "voice_agent",
                     "success": result["success"],
                     "transcribed_text": result.get("transcribed_text", ""),
                     "confidence": result.get("confidence", 0.0),
-                    "language": result.get("language", "unknown"),
+                    "language": result.get("language", language),
+                    "intent": result.get("intent"),
+                    "entities": result.get("entities", []),
                     "error": result.get("error", "")
                 }
             
@@ -297,14 +258,19 @@ Tu ne génères pas de réponses textuelles, tu traites uniquement l'audio."""
     
     def get_capabilities(self) -> Dict[str, Any]:
         """Retourner les capacités de l'agent"""
+        voice_capabilities = self.voice_system.get_capabilities()
+        
         return {
             "agent_name": "voice_agent",
             "capabilities": [
                 "audio_processing",
                 "voice_to_text",
-                "audio_conversion"
+                "text_to_speech",
+                "audio_conversion",
+                "intent_extraction",
+                "multilingual_support"
             ],
             "supported_formats": self.supported_formats,
-            "ffmpeg_available": self.ffmpeg_available,
-            "whisper_available": WHISPER_AVAILABLE and self.whisper_model is not None
+            "voice_system_capabilities": voice_capabilities,
+            "supported_languages": self.voice_system.get_supported_languages()
         }

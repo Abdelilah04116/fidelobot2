@@ -1,6 +1,6 @@
 # orchestrator.py
 from langgraph.graph import StateGraph, END
-from langgraph.graph.state import CompiledGraph
+from langgraph.graph import CompiledGraph
 from typing import Dict, Any, List, TypedDict, Annotated
 from typing_extensions import TypedDict
 import operator
