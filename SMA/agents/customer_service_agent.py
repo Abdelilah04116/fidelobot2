@@ -10,7 +10,9 @@ from .base_agent import BaseAgent
 from models.message_models import AgentMessage, MessageType, MessageMetadata
 from models.agent_models import AgentType, AgentCapability, AgentResponse
 from models.context_models import UserContext
-from ..models.database import SessionLocal, User, Product, Order, OrderItem, KnowledgeBase
+from catalogue.backend.database import SessionLocal
+# AGENT CONNECTÉ À POSTGRES (relationnel)
+# Utilisez SessionLocal() pour accéder aux tickets, utilisateurs, commandes
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
 import json
@@ -563,7 +565,7 @@ class CustomerServiceAgent(BaseAgent):
                     requires_human=True
                 )
             
-            # 4. Générer une réponse appropriée
+            # 4. Génère une réponse appropriée
             response_content = await self._generate_support_response(message, knowledge_answer, support_type, context)
             
             metadata = MessageMetadata(

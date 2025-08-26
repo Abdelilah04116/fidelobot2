@@ -1,11 +1,13 @@
 from .base_agent import BaseAgent
 from typing import Dict, Any, List, Optional
-from ..models.database import SessionLocal, User, Product, Order
+from catalogue.backend.database import SessionLocal
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
 import logging
 from datetime import datetime, timedelta
 
+# AGENT CONNECTÉ À POSTGRES (relationnel)
+# Utilisez SessionLocal() pour accéder aux données de durabilité/produits
 class SustainabilityAgent(BaseAgent):
     def __init__(self):
         super().__init__(

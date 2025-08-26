@@ -1,10 +1,14 @@
 from .base_agent import BaseAgent
 from typing import Dict, Any, Optional
-from ..models.database import SessionLocal, User, Order, OrderItem, Product, Rating
+from catalogue.backend.database import SessionLocal
+from catalogue.backend.models import User, Order, OrderItem, Product
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_
 from datetime import datetime, timedelta
 import logging
+from catalogue.backend.qdrant_client import client as qdrant_client, search_embedding
+# AGENT CONNECTÉ À QDRANT (vectoriel)
+# Utilisez search_embedding(...) pour la recherche de profils utilisateurs
 
 class CustomerProfilingAgent(BaseAgent):
     def __init__(self):

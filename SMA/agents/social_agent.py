@@ -1,11 +1,15 @@
 from .base_agent import BaseAgent
 from typing import Dict, Any, List, Optional
-from ..models.database import SessionLocal, User, Product, Order, Review, SocialPost
+from catalogue.backend.database import SessionLocal
+from catalogue.backend.models import User, Product, Order
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
 import logging
 from datetime import datetime, timedelta
 import json
+from catalogue.backend.qdrant_client import client as qdrant_client, search_embedding
+# AGENT CONNECTÉ À QDRANT (vectoriel)
+# Utilisez search_embedding(...) pour la recherche sociale
 
 class SocialAgent(BaseAgent):
     def __init__(self):

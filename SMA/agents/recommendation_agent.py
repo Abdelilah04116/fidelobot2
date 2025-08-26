@@ -1,10 +1,14 @@
 from .base_agent import BaseAgent
 from typing import Dict, Any, List, Optional
-from ..models.database import SessionLocal, User, Product, Order, OrderItem, Rating
+from catalogue.backend.database import SessionLocal
+from catalogue.backend.models import User, Product, Order, OrderItem
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
 import logging
 import math
+from catalogue.backend.qdrant_client import client as qdrant_client, search_embedding
+# AGENT CONNECTÉ À QDRANT (vectoriel)
+# Utilisez search_embedding(...) pour la recherche de recommandations sémantiques
 
 class RecommendationAgent(BaseAgent):
     def __init__(self):

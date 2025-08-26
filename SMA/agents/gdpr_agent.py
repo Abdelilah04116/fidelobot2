@@ -4,7 +4,10 @@ from typing import Dict, Any, List
 import hashlib
 import json
 from datetime import datetime, timedelta
-from ..models.database import SessionLocal, User, Message, Conversation
+from catalogue.backend.database import SessionLocal
+# AGENT CONNECTÉ À POSTGRES (relationnel)
+# Utilisez SessionLocal() pour accéder aux données utilisateurs/messages
+from catalogue.backend.models import User
 
 class GDPRAgent(BaseAgent):
     def __init__(self):
@@ -154,7 +157,7 @@ class GDPRAgent(BaseAgent):
                 user_data["conversations"].append(conv_data)
             
             # Commandes (si applicable)
-            from ..models.database import Order
+            from catalogue.backend.models import Order
             orders = db.query(Order).filter(Order.user_id == user_id).all()
             user_data["orders"] = []
             

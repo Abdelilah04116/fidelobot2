@@ -1,0 +1,2052 @@
+{
+  "categories": [
+    {
+      "id": 1,
+      "nom": "Élément"
+    },
+    {
+      "id": 2,
+      "nom": "Fumer"
+    },
+    {
+      "id": 3,
+      "nom": "Cruel"
+    },
+    {
+      "id": 4,
+      "nom": "Être"
+    },
+    {
+      "id": 5,
+      "nom": "Porte"
+    },
+    {
+      "id": 6,
+      "nom": "Vers"
+    },
+    {
+      "id": 7,
+      "nom": "Fille"
+    },
+    {
+      "id": 8,
+      "nom": "Produire"
+    }
+  ],
+  "utilisateurs": [
+    {
+      "id": 1,
+      "nom": "Aurore du Menard",
+      "email": "martin53@example.com",
+      "mot_de_passe": "Xq56tFqxVI8_",
+      "consentement_rgpd": true
+    },
+    {
+      "id": 2,
+      "nom": "Odette Petit",
+      "email": "thibaultguilbert@example.org",
+      "mot_de_passe": "0*+#E3Ppy$^5",
+      "consentement_rgpd": false
+    },
+    {
+      "id": 3,
+      "nom": "René Brunet",
+      "email": "josettecolin@example.net",
+      "mot_de_passe": "@2z+PTTxQ%Pf",
+      "consentement_rgpd": false
+    },
+    {
+      "id": 4,
+      "nom": "Martin Dupuis",
+      "email": "bgirard@example.org",
+      "mot_de_passe": "#ZWVQvUdw8*Y",
+      "consentement_rgpd": true
+    },
+    {
+      "id": 5,
+      "nom": "Stéphane Gérard-Grenier",
+      "email": "zleclerc@example.com",
+      "mot_de_passe": "B(9BsvTp+BgQ",
+      "consentement_rgpd": true
+    },
+    {
+      "id": 6,
+      "nom": "Susan Le Roux",
+      "email": "margot42@example.org",
+      "mot_de_passe": "#x2nO@s@&1UX",
+      "consentement_rgpd": true
+    },
+    {
+      "id": 7,
+      "nom": "Lucy Le Weber",
+      "email": "louisegerard@example.com",
+      "mot_de_passe": "0oco5VsgbQ_F",
+      "consentement_rgpd": true
+    },
+    {
+      "id": 8,
+      "nom": "Franck de la Lejeune",
+      "email": "tessierdenise@example.com",
+      "mot_de_passe": "oZ3y0Ezx^4A!",
+      "consentement_rgpd": true
+    },
+    {
+      "id": 9,
+      "nom": "Alexandre Gauthier",
+      "email": "roussellaetitia@example.net",
+      "mot_de_passe": "P_dNunL4Z+5x",
+      "consentement_rgpd": false
+    },
+    {
+      "id": 10,
+      "nom": "Aurore Ferrand",
+      "email": "josephinelebon@example.com",
+      "mot_de_passe": "Zt6eNyos(aNR",
+      "consentement_rgpd": false
+    },
+    {
+      "id": 11,
+      "nom": "Adèle de la Gay",
+      "email": "rdevaux@example.com",
+      "mot_de_passe": "3eAX#PPt*XUO",
+      "consentement_rgpd": true
+    },
+    {
+      "id": 12,
+      "nom": "Denise Martin",
+      "email": "le-goffemile@example.net",
+      "mot_de_passe": "%L19@(tQU2az",
+      "consentement_rgpd": true
+    },
+    {
+      "id": 13,
+      "nom": "Frédéric Lebon",
+      "email": "pjacquet@example.com",
+      "mot_de_passe": "#2Z1FnpoZBbH",
+      "consentement_rgpd": true
+    },
+    {
+      "id": 14,
+      "nom": "Patricia de la Gimenez",
+      "email": "zoe45@example.net",
+      "mot_de_passe": "39^!GTGgS61#",
+      "consentement_rgpd": true
+    },
+    {
+      "id": 15,
+      "nom": "Éléonore Faure",
+      "email": "aimee96@example.net",
+      "mot_de_passe": "*AMtLqWtW5Cl",
+      "consentement_rgpd": false
+    },
+    {
+      "id": 16,
+      "nom": "Franck de David",
+      "email": "texiermargaret@example.net",
+      "mot_de_passe": "1H3XDFDz*Tv7",
+      "consentement_rgpd": false
+    },
+    {
+      "id": 17,
+      "nom": "Augustin Bertin",
+      "email": "dominiquecarlier@example.net",
+      "mot_de_passe": "SVdJ3oXbo#Z#",
+      "consentement_rgpd": false
+    },
+    {
+      "id": 18,
+      "nom": "Alice Marchal",
+      "email": "francois03@example.net",
+      "mot_de_passe": "^M@2Gw8FVZkL",
+      "consentement_rgpd": true
+    },
+    {
+      "id": 19,
+      "nom": "Luce-Luce Auger",
+      "email": "valetteleon@example.net",
+      "mot_de_passe": "CQ1@Apv3KJ0Z",
+      "consentement_rgpd": false
+    },
+    {
+      "id": 20,
+      "nom": "Louis Techer",
+      "email": "beckermathilde@example.com",
+      "mot_de_passe": "A91Iqckh_kMC",
+      "consentement_rgpd": true
+    }
+  ],
+  "produits": [
+    {
+      "id": 1,
+      "nom": "Servir comprendre durer.",
+      "prix": 34.39,
+      "stock": 19,
+      "categorie_id": 4,
+      "description_courte": "Certes qualité tour droite quoi recevoir bas fil secret mêler.",
+      "caracteristiques_structurées": {
+        "couleur": "Rouge",
+        "poids": "747g",
+        "marque": "Rousset S.A.S."
+      }
+    },
+    {
+      "id": 2,
+      "nom": "Détacher sous état.",
+      "prix": 376.42,
+      "stock": 53,
+      "categorie_id": 3,
+      "description_courte": "Raison changement commencer voir côte horizon grain remarquer réduire.",
+      "caracteristiques_structurées": {
+        "couleur": "Bleu royal",
+        "poids": "1410g",
+        "marque": "Delaunay"
+      }
+    },
+    {
+      "id": 3,
+      "nom": "Apprendre ramener mort.",
+      "prix": 341.89,
+      "stock": 31,
+      "categorie_id": 6,
+      "description_courte": "Clair gloire ton chaque venir signifier commun particulier construire tendre simplement.",
+      "caracteristiques_structurées": {
+        "couleur": "Bleu alice",
+        "poids": "1071g",
+        "marque": "Maillot S.A.R.L."
+      }
+    },
+    {
+      "id": 4,
+      "nom": "Ni douze.",
+      "prix": 57.93,
+      "stock": 51,
+      "categorie_id": 6,
+      "description_courte": "Chaise grâce quel dehors midi présence désespoir branche lit examiner arme cerveau parce que.",
+      "caracteristiques_structurées": {
+        "couleur": "Citron vert foncé",
+        "poids": "1318g",
+        "marque": "Guillot"
+      }
+    },
+    {
+      "id": 5,
+      "nom": "Prétendre signifier.",
+      "prix": 133.06,
+      "stock": 71,
+      "categorie_id": 6,
+      "description_courte": "Venir bientôt obliger transformer champ argent il dominer ramener sang cheveu couleur.",
+      "caracteristiques_structurées": {
+        "couleur": "Bisque",
+        "poids": "1321g",
+        "marque": "Hoarau Potier S.A.S."
+      }
+    },
+    {
+      "id": 6,
+      "nom": "Rôle mari juger.",
+      "prix": 433.33,
+      "stock": 86,
+      "categorie_id": 2,
+      "description_courte": "Rare réveiller rencontrer lourd brûler vivre part rapport découvrir sourire envie.",
+      "caracteristiques_structurées": {
+        "couleur": "Blanc menthe",
+        "poids": "265g",
+        "marque": "Briand"
+      }
+    },
+    {
+      "id": 7,
+      "nom": "Fuir sueur.",
+      "prix": 392.1,
+      "stock": 16,
+      "categorie_id": 3,
+      "description_courte": "Poussière enfoncer joli inventer histoire supporter considérer obliger main autre particulier étage.",
+      "caracteristiques_structurées": {
+        "couleur": "Orange foncé",
+        "poids": "221g",
+        "marque": "Leduc"
+      }
+    },
+    {
+      "id": 8,
+      "nom": "Tel cabinet.",
+      "prix": 60.79,
+      "stock": 11,
+      "categorie_id": 4,
+      "description_courte": "Emmener train sentier baisser envoyer briller passage premier désir sens commencement falloir.",
+      "caracteristiques_structurées": {
+        "couleur": "Prune",
+        "poids": "1930g",
+        "marque": "Barthelemy Cohen SARL"
+      }
+    },
+    {
+      "id": 9,
+      "nom": "Endormir volonté.",
+      "prix": 324.14,
+      "stock": 39,
+      "categorie_id": 6,
+      "description_courte": "Mal promettre douleur nuit atteindre événement montrer me.",
+      "caracteristiques_structurées": {
+        "couleur": "Bleu poudre",
+        "poids": "493g",
+        "marque": "Louis S.A.S."
+      }
+    },
+    {
+      "id": 10,
+      "nom": "Chemin essuyer.",
+      "prix": 45.08,
+      "stock": 71,
+      "categorie_id": 2,
+      "description_courte": "Pourquoi si retrouver siècle marchand vaste ruine vieux adresser.",
+      "caracteristiques_structurées": {
+        "couleur": "Tomate",
+        "poids": "793g",
+        "marque": "Parent"
+      }
+    },
+    {
+      "id": 11,
+      "nom": "Obliger dessus.",
+      "prix": 393.74,
+      "stock": 31,
+      "categorie_id": 5,
+      "description_courte": "Lune haute résistance fonder ensemble note autre point peine connaître part.",
+      "caracteristiques_structurées": {
+        "couleur": "Orange foncé",
+        "poids": "912g",
+        "marque": "Valette Morin S.A."
+      }
+    },
+    {
+      "id": 12,
+      "nom": "Chasse vers énorme.",
+      "prix": 235.36,
+      "stock": 48,
+      "categorie_id": 3,
+      "description_courte": "Tombe raconter absolu souvent trois branche sol dessiner suffire calme important amour ainsi.",
+      "caracteristiques_structurées": {
+        "couleur": "Corail",
+        "poids": "1459g",
+        "marque": "Goncalves Lamy S.A."
+      }
+    },
+    {
+      "id": 13,
+      "nom": "Croire rideau couler.",
+      "prix": 302.62,
+      "stock": 26,
+      "categorie_id": 4,
+      "description_courte": "Où trace repas inventer long désert supérieur éclater engager élément profondément enfin.",
+      "caracteristiques_structurées": {
+        "couleur": "Beige pêche",
+        "poids": "785g",
+        "marque": "Hubert Vidal SA"
+      }
+    },
+    {
+      "id": 14,
+      "nom": "Oser guerre action.",
+      "prix": 233.94,
+      "stock": 13,
+      "categorie_id": 5,
+      "description_courte": "Peur semblable celui partager angoisse frère fin passé demande.",
+      "caracteristiques_structurées": {
+        "couleur": "Violet foncé",
+        "poids": "323g",
+        "marque": "Besnard SA"
+      }
+    },
+    {
+      "id": 15,
+      "nom": "Lueur yeux lors.",
+      "prix": 158.95,
+      "stock": 65,
+      "categorie_id": 5,
+      "description_courte": "Vers dessus d'autres cri page force.",
+      "caracteristiques_structurées": {
+        "couleur": "Brun sable",
+        "poids": "771g",
+        "marque": "Dubois"
+      }
+    },
+    {
+      "id": 16,
+      "nom": "Employer terrible.",
+      "prix": 74.01,
+      "stock": 52,
+      "categorie_id": 6,
+      "description_courte": "Saluer vérité animal arracher certainement caractère chercher cher autre debout.",
+      "caracteristiques_structurées": {
+        "couleur": "Blanc",
+        "poids": "668g",
+        "marque": "Laine Mahe SARL"
+      }
+    },
+    {
+      "id": 17,
+      "nom": "Plan pensée.",
+      "prix": 177.83,
+      "stock": 82,
+      "categorie_id": 2,
+      "description_courte": "Lettre un examiner également appartement curieux nul midi affirmer intérieur anglais conversation loi.",
+      "caracteristiques_structurées": {
+        "couleur": "Beige citron soie",
+        "poids": "797g",
+        "marque": "Gauthier S.A.R.L."
+      }
+    },
+    {
+      "id": 18,
+      "nom": "Employer père.",
+      "prix": 446.98,
+      "stock": 64,
+      "categorie_id": 5,
+      "description_courte": "Ouvrir dimanche amuser porter livrer affirmer oh profond élever fonction surtout te.",
+      "caracteristiques_structurées": {
+        "couleur": "Citron vert foncé",
+        "poids": "297g",
+        "marque": "Poulain"
+      }
+    },
+    {
+      "id": 19,
+      "nom": "Social couper.",
+      "prix": 434.45,
+      "stock": 34,
+      "categorie_id": 5,
+      "description_courte": "Rencontre charge courage eau curiosité toute.",
+      "caracteristiques_structurées": {
+        "couleur": "Bleu ardoise foncé",
+        "poids": "929g",
+        "marque": "Vaillant S.A."
+      }
+    },
+    {
+      "id": 20,
+      "nom": "Accorder déchirer.",
+      "prix": 267.53,
+      "stock": 78,
+      "categorie_id": 4,
+      "description_courte": "Plus agiter blanc maintenir d'abord pouvoir glisser trop grain exemple.",
+      "caracteristiques_structurées": {
+        "couleur": "Blanc coquillage",
+        "poids": "652g",
+        "marque": "Hoareau et Fils"
+      }
+    },
+    {
+      "id": 21,
+      "nom": "Trou protéger rayon nord.",
+      "prix": 152.01,
+      "stock": 70,
+      "categorie_id": 4,
+      "description_courte": "Bas lit accent jeter composer recherche menacer oublier poche espoir.",
+      "caracteristiques_structurées": {
+        "couleur": "Gris mat",
+        "poids": "1988g",
+        "marque": "Renaud"
+      }
+    },
+    {
+      "id": 22,
+      "nom": "Est former distance.",
+      "prix": 138.35,
+      "stock": 88,
+      "categorie_id": 7,
+      "description_courte": "Somme aide essayer abandonner désormais selon précipiter dans te avant moment.",
+      "caracteristiques_structurées": {
+        "couleur": "Bleu clair",
+        "poids": "343g",
+        "marque": "Lopez SA"
+      }
+    },
+    {
+      "id": 23,
+      "nom": "Apparaître briller.",
+      "prix": 88.31,
+      "stock": 90,
+      "categorie_id": 6,
+      "description_courte": "À jouer gloire étude posséder éviter spectacle épaule voler mal auteur grâce.",
+      "caracteristiques_structurées": {
+        "couleur": "Violet chardon",
+        "poids": "321g",
+        "marque": "Fouquet"
+      }
+    },
+    {
+      "id": 24,
+      "nom": "Aspect maintenant besoin.",
+      "prix": 47.44,
+      "stock": 32,
+      "categorie_id": 4,
+      "description_courte": "Pierre principe fond vieux dehors reste.",
+      "caracteristiques_structurées": {
+        "couleur": "Gris",
+        "poids": "646g",
+        "marque": "Pages Monnier S.A."
+      }
+    },
+    {
+      "id": 25,
+      "nom": "Ce combien jeunesse.",
+      "prix": 334.13,
+      "stock": 94,
+      "categorie_id": 7,
+      "description_courte": "Contenir attacher porter conduire risquer immense falloir même.",
+      "caracteristiques_structurées": {
+        "couleur": "Bleuet",
+        "poids": "837g",
+        "marque": "Berger Rousseau SARL"
+      }
+    },
+    {
+      "id": 26,
+      "nom": "Battre divers.",
+      "prix": 488.46,
+      "stock": 32,
+      "categorie_id": 4,
+      "description_courte": "Déclarer plaindre minute nom fixer pluie énorme mais volonté.",
+      "caracteristiques_structurées": {
+        "couleur": "Bisque",
+        "poids": "1814g",
+        "marque": "Alves"
+      }
+    },
+    {
+      "id": 27,
+      "nom": "Autre sou.",
+      "prix": 225.89,
+      "stock": 84,
+      "categorie_id": 7,
+      "description_courte": "Vieil visible moyen bras cinquante signifier cuisine choisir précieux solitude âgé.",
+      "caracteristiques_structurées": {
+        "couleur": "Beige papaye",
+        "poids": "1123g",
+        "marque": "Carpentier"
+      }
+    },
+    {
+      "id": 28,
+      "nom": "Voisin gauche répandre.",
+      "prix": 367.55,
+      "stock": 2,
+      "categorie_id": 8,
+      "description_courte": "Prévoir fille riche parler semblable île étranger pénétrer.",
+      "caracteristiques_structurées": {
+        "couleur": "Vert marin clair",
+        "poids": "1799g",
+        "marque": "Payet et Fils"
+      }
+    },
+    {
+      "id": 29,
+      "nom": "Aucun pain.",
+      "prix": 303.06,
+      "stock": 71,
+      "categorie_id": 8,
+      "description_courte": "Seconde temps rester dessus expliquer corps vers grave nation partir clef je briller.",
+      "caracteristiques_structurées": {
+        "couleur": "Orange",
+        "poids": "755g",
+        "marque": "Rousseau"
+      }
+    },
+    {
+      "id": 30,
+      "nom": "Raison.",
+      "prix": 459.49,
+      "stock": 21,
+      "categorie_id": 1,
+      "description_courte": "Retour maison trop bras si recueillir crier.",
+      "caracteristiques_structurées": {
+        "couleur": "Bleu azur clair",
+        "poids": "459g",
+        "marque": "Meyer S.A.S."
+      }
+    },
+    {
+      "id": 31,
+      "nom": "Nez suffire.",
+      "prix": 405.29,
+      "stock": 16,
+      "categorie_id": 4,
+      "description_courte": "Toi police franc écraser au nouveau puissant poche.",
+      "caracteristiques_structurées": {
+        "couleur": "Noir",
+        "poids": "288g",
+        "marque": "Marchal"
+      }
+    },
+    {
+      "id": 32,
+      "nom": "Expérience esprit.",
+      "prix": 402.93,
+      "stock": 27,
+      "categorie_id": 1,
+      "description_courte": "Perdu reconnaître vert depuis abattre absence dès dépasser tendre prendre groupe partie tendre.",
+      "caracteristiques_structurées": {
+        "couleur": "Blanc spectral",
+        "poids": "1862g",
+        "marque": "Jacquet"
+      }
+    },
+    {
+      "id": 33,
+      "nom": "Voix emporter.",
+      "prix": 58.77,
+      "stock": 92,
+      "categorie_id": 8,
+      "description_courte": "Quarante nécessaire gros compter succès disparaître oser discours établir sauver drôle occasion promener.",
+      "caracteristiques_structurées": {
+        "couleur": "Ivoire",
+        "poids": "1156g",
+        "marque": "Fernandez"
+      }
+    },
+    {
+      "id": 34,
+      "nom": "Neuf genre lire.",
+      "prix": 377.91,
+      "stock": 77,
+      "categorie_id": 3,
+      "description_courte": "Danger pousser retenir vin quoi personne loin parmi asseoir prison éclairer jeunesse venir.",
+      "caracteristiques_structurées": {
+        "couleur": "Vert printemps moyen",
+        "poids": "1487g",
+        "marque": "Tessier SA"
+      }
+    },
+    {
+      "id": 35,
+      "nom": "Second miser.",
+      "prix": 85.93,
+      "stock": 95,
+      "categorie_id": 3,
+      "description_courte": "Livrer d'autres calme inconnu jour apparence chez.",
+      "caracteristiques_structurées": {
+        "couleur": "Gris gainsboro (Etain)",
+        "poids": "1583g",
+        "marque": "Leroux Charrier SA"
+      }
+    },
+    {
+      "id": 36,
+      "nom": "Apprendre sans beau.",
+      "prix": 233.89,
+      "stock": 80,
+      "categorie_id": 5,
+      "description_courte": "Sortir essayer cacher colline histoire banc un tête pied roman.",
+      "caracteristiques_structurées": {
+        "couleur": "Azurin",
+        "poids": "346g",
+        "marque": "Jacquet SA"
+      }
+    },
+    {
+      "id": 37,
+      "nom": "Membre réussir taire.",
+      "prix": 170.32,
+      "stock": 86,
+      "categorie_id": 3,
+      "description_courte": "Profiter poche écrire étaler second sauter depuis.",
+      "caracteristiques_structurées": {
+        "couleur": "Noir",
+        "poids": "1981g",
+        "marque": "Faivre Dias SARL"
+      }
+    },
+    {
+      "id": 38,
+      "nom": "Marchand retenir envelopper habitude.",
+      "prix": 19.24,
+      "stock": 18,
+      "categorie_id": 8,
+      "description_courte": "Repousser à recueillir journal obtenir risquer enfant robe près palais à solitude immobile.",
+      "caracteristiques_structurées": {
+        "couleur": "Tomate",
+        "poids": "1377g",
+        "marque": "Delattre SA"
+      }
+    },
+    {
+      "id": 39,
+      "nom": "Cesse paupière valoir.",
+      "prix": 396.23,
+      "stock": 13,
+      "categorie_id": 2,
+      "description_courte": "Non nommer connaissance souhaiter sentiment delà besoin étaler naturellement fin règle fidèle eau.",
+      "caracteristiques_structurées": {
+        "couleur": "Violet chardon",
+        "poids": "1558g",
+        "marque": "Le Gall"
+      }
+    },
+    {
+      "id": 40,
+      "nom": "Tellement désigner air.",
+      "prix": 55.33,
+      "stock": 12,
+      "categorie_id": 4,
+      "description_courte": "Double point rencontre monde précéder ceci déchirer officier interroger sein fidèle retenir chaise.",
+      "caracteristiques_structurées": {
+        "couleur": "Vert forêt",
+        "poids": "508g",
+        "marque": "Guérin SARL"
+      }
+    },
+    {
+      "id": 41,
+      "nom": "Répondre temps.",
+      "prix": 440.18,
+      "stock": 62,
+      "categorie_id": 8,
+      "description_courte": "Promener chacun observer considérer pendant théâtre réussir mot depuis début entendre garder.",
+      "caracteristiques_structurées": {
+        "couleur": "Beige mocassin",
+        "poids": "1416g",
+        "marque": "Benoit SA"
+      }
+    },
+    {
+      "id": 42,
+      "nom": "Occasion blanc vin.",
+      "prix": 371.86,
+      "stock": 32,
+      "categorie_id": 3,
+      "description_courte": "Décider simplement sommet précipiter maladie événement suivant boire claire courage tourner hors enlever.",
+      "caracteristiques_structurées": {
+        "couleur": "Bleu clair",
+        "poids": "1136g",
+        "marque": "Klein Faivre S.A.R.L."
+      }
+    },
+    {
+      "id": 43,
+      "nom": "Rayon président.",
+      "prix": 114.06,
+      "stock": 13,
+      "categorie_id": 2,
+      "description_courte": "Apparaître part peser mien vie puisque hors occuper endormir jeune vérité.",
+      "caracteristiques_structurées": {
+        "couleur": "Gris foncé (Acier)",
+        "poids": "686g",
+        "marque": "Teixeira"
+      }
+    },
+    {
+      "id": 44,
+      "nom": "Choix paysage.",
+      "prix": 266.01,
+      "stock": 9,
+      "categorie_id": 1,
+      "description_courte": "Mieux lentement travailler sien tendre article.",
+      "caracteristiques_structurées": {
+        "couleur": "Indigo",
+        "poids": "262g",
+        "marque": "Martineau"
+      }
+    },
+    {
+      "id": 45,
+      "nom": "Certes phrase étendre.",
+      "prix": 311.61,
+      "stock": 82,
+      "categorie_id": 1,
+      "description_courte": "Vêtement terreur tourner toi réserver placer bataille.",
+      "caracteristiques_structurées": {
+        "couleur": "Bleu ardoise moyen",
+        "poids": "350g",
+        "marque": "Colin S.A."
+      }
+    },
+    {
+      "id": 46,
+      "nom": "Spectacle rôle.",
+      "prix": 41.47,
+      "stock": 95,
+      "categorie_id": 2,
+      "description_courte": "Rentrer terrible fumée dire examiner penser as neuf.",
+      "caracteristiques_structurées": {
+        "couleur": "Olive",
+        "poids": "599g",
+        "marque": "Louis"
+      }
+    },
+    {
+      "id": 47,
+      "nom": "Avec par parole.",
+      "prix": 496.17,
+      "stock": 0,
+      "categorie_id": 6,
+      "description_courte": "Vert réponse guère grâce remplir bord pouvoir réclamer poser repousser chaud fonction.",
+      "caracteristiques_structurées": {
+        "couleur": "Aigue-marine",
+        "poids": "1261g",
+        "marque": "Guillet et Fils"
+      }
+    },
+    {
+      "id": 48,
+      "nom": "Terrain ouvrir.",
+      "prix": 84.6,
+      "stock": 17,
+      "categorie_id": 2,
+      "description_courte": "Caractère boire rouge faveur rue sujet.",
+      "caracteristiques_structurées": {
+        "couleur": "Rose Passion",
+        "poids": "1133g",
+        "marque": "Marin"
+      }
+    },
+    {
+      "id": 49,
+      "nom": "Terreur été colline.",
+      "prix": 195.59,
+      "stock": 26,
+      "categorie_id": 4,
+      "description_courte": "Quelque battre secours leur bois prendre fond.",
+      "caracteristiques_structurées": {
+        "couleur": "Prune",
+        "poids": "1418g",
+        "marque": "Louis Paul S.A.R.L."
+      }
+    },
+    {
+      "id": 50,
+      "nom": "Cependant papa.",
+      "prix": 105.02,
+      "stock": 14,
+      "categorie_id": 5,
+      "description_courte": "Pont général certes comprendre chaud chair sable.",
+      "caracteristiques_structurées": {
+        "couleur": "Aigue-marine",
+        "poids": "436g",
+        "marque": "Mendès S.A.S."
+      }
+    }
+  ],
+  "commandes": [
+    {
+      "id": 1,
+      "utilisateur_id": 18,
+      "date": "2024-11-11T13:44:58",
+      "statut": "annulée",
+      "total": 1550.68
+    },
+    {
+      "id": 2,
+      "utilisateur_id": 13,
+      "date": "2025-07-13T05:14:03",
+      "statut": "en_attente",
+      "total": 4370.26
+    },
+    {
+      "id": 3,
+      "utilisateur_id": 18,
+      "date": "2025-05-29T17:18:29",
+      "statut": "annulée",
+      "total": 1295.98
+    },
+    {
+      "id": 4,
+      "utilisateur_id": 20,
+      "date": "2024-10-26T22:03:12",
+      "statut": "livrée",
+      "total": 1135.18
+    },
+    {
+      "id": 5,
+      "utilisateur_id": 5,
+      "date": "2025-08-04T05:10:29",
+      "statut": "expédiée",
+      "total": 470.72
+    },
+    {
+      "id": 6,
+      "utilisateur_id": 8,
+      "date": "2025-06-30T00:52:45",
+      "statut": "livrée",
+      "total": 2249.02
+    },
+    {
+      "id": 7,
+      "utilisateur_id": 5,
+      "date": "2024-12-23T07:18:13",
+      "statut": "livrée",
+      "total": 1510.43
+    },
+    {
+      "id": 8,
+      "utilisateur_id": 12,
+      "date": "2024-12-09T09:07:31",
+      "statut": "en_attente",
+      "total": 1422.67
+    },
+    {
+      "id": 9,
+      "utilisateur_id": 7,
+      "date": "2025-04-16T05:20:37",
+      "statut": "en_attente",
+      "total": 1198.28
+    },
+    {
+      "id": 10,
+      "utilisateur_id": 20,
+      "date": "2025-06-29T14:31:18",
+      "statut": "annulée",
+      "total": 1183.01
+    },
+    {
+      "id": 11,
+      "utilisateur_id": 4,
+      "date": "2024-08-26T03:18:20",
+      "statut": "en_attente",
+      "total": 868.9
+    },
+    {
+      "id": 12,
+      "utilisateur_id": 18,
+      "date": "2024-11-13T09:17:11",
+      "statut": "livrée",
+      "total": 2536.85
+    },
+    {
+      "id": 13,
+      "utilisateur_id": 19,
+      "date": "2025-06-30T00:51:36",
+      "statut": "en_attente",
+      "total": 415.05
+    },
+    {
+      "id": 14,
+      "utilisateur_id": 1,
+      "date": "2024-09-01T01:46:40",
+      "statut": "livrée",
+      "total": 1808.13
+    },
+    {
+      "id": 15,
+      "utilisateur_id": 9,
+      "date": "2024-08-28T21:08:07",
+      "statut": "livrée",
+      "total": 679.7
+    },
+    {
+      "id": 16,
+      "utilisateur_id": 6,
+      "date": "2024-10-30T20:15:36",
+      "statut": "en_attente",
+      "total": 326.91
+    },
+    {
+      "id": 17,
+      "utilisateur_id": 4,
+      "date": "2024-09-09T16:44:54",
+      "statut": "annulée",
+      "total": 1891.86
+    },
+    {
+      "id": 18,
+      "utilisateur_id": 17,
+      "date": "2024-10-10T06:21:27",
+      "statut": "livrée",
+      "total": 2444.12
+    },
+    {
+      "id": 19,
+      "utilisateur_id": 13,
+      "date": "2025-02-27T17:03:23",
+      "statut": "en_attente",
+      "total": 1345.38
+    },
+    {
+      "id": 20,
+      "utilisateur_id": 15,
+      "date": "2024-10-06T00:13:07",
+      "statut": "expédiée",
+      "total": 82.94
+    },
+    {
+      "id": 21,
+      "utilisateur_id": 10,
+      "date": "2024-10-19T00:01:12",
+      "statut": "expédiée",
+      "total": 2985.03
+    },
+    {
+      "id": 22,
+      "utilisateur_id": 19,
+      "date": "2025-01-15T09:46:25",
+      "statut": "expédiée",
+      "total": 1099.81
+    },
+    {
+      "id": 23,
+      "utilisateur_id": 15,
+      "date": "2025-01-12T15:06:05",
+      "statut": "expédiée",
+      "total": 1392.59
+    },
+    {
+      "id": 24,
+      "utilisateur_id": 19,
+      "date": "2025-03-14T02:37:33",
+      "statut": "annulée",
+      "total": 1901.28
+    },
+    {
+      "id": 25,
+      "utilisateur_id": 2,
+      "date": "2025-03-03T06:12:41",
+      "statut": "en_attente",
+      "total": 323.84
+    },
+    {
+      "id": 26,
+      "utilisateur_id": 10,
+      "date": "2025-06-04T23:54:50",
+      "statut": "expédiée",
+      "total": 3058.61
+    },
+    {
+      "id": 27,
+      "utilisateur_id": 9,
+      "date": "2025-08-22T15:02:46",
+      "statut": "expédiée",
+      "total": 1548.78
+    },
+    {
+      "id": 28,
+      "utilisateur_id": 15,
+      "date": "2024-11-01T04:12:07",
+      "statut": "annulée",
+      "total": 823.25
+    },
+    {
+      "id": 29,
+      "utilisateur_id": 10,
+      "date": "2025-06-01T04:34:02",
+      "statut": "expédiée",
+      "total": 841.61
+    },
+    {
+      "id": 30,
+      "utilisateur_id": 19,
+      "date": "2024-12-14T14:42:24",
+      "statut": "expédiée",
+      "total": 141.71
+    }
+  ],
+  "commande_produits": [
+    {
+      "id_commande": 1,
+      "id_produit": 32,
+      "quantite": 3,
+      "prix_unitaire": 402.93
+    },
+    {
+      "id_commande": 1,
+      "id_produit": 3,
+      "quantite": 1,
+      "prix_unitaire": 341.89
+    },
+    {
+      "id_commande": 2,
+      "id_produit": 9,
+      "quantite": 3,
+      "prix_unitaire": 324.14
+    },
+    {
+      "id_commande": 2,
+      "id_produit": 32,
+      "quantite": 3,
+      "prix_unitaire": 402.93
+    },
+    {
+      "id_commande": 2,
+      "id_produit": 31,
+      "quantite": 2,
+      "prix_unitaire": 405.29
+    },
+    {
+      "id_commande": 2,
+      "id_produit": 30,
+      "quantite": 3,
+      "prix_unitaire": 459.49
+    },
+    {
+      "id_commande": 3,
+      "id_produit": 41,
+      "quantite": 1,
+      "prix_unitaire": 440.18
+    },
+    {
+      "id_commande": 3,
+      "id_produit": 16,
+      "quantite": 3,
+      "prix_unitaire": 74.01
+    },
+    {
+      "id_commande": 3,
+      "id_produit": 40,
+      "quantite": 3,
+      "prix_unitaire": 55.33
+    },
+    {
+      "id_commande": 3,
+      "id_produit": 36,
+      "quantite": 2,
+      "prix_unitaire": 233.89
+    },
+    {
+      "id_commande": 4,
+      "id_produit": 25,
+      "quantite": 1,
+      "prix_unitaire": 334.13
+    },
+    {
+      "id_commande": 4,
+      "id_produit": 10,
+      "quantite": 1,
+      "prix_unitaire": 45.08
+    },
+    {
+      "id_commande": 4,
+      "id_produit": 49,
+      "quantite": 3,
+      "prix_unitaire": 195.59
+    },
+    {
+      "id_commande": 4,
+      "id_produit": 48,
+      "quantite": 2,
+      "prix_unitaire": 84.6
+    },
+    {
+      "id_commande": 5,
+      "id_produit": 1,
+      "quantite": 3,
+      "prix_unitaire": 34.39
+    },
+    {
+      "id_commande": 5,
+      "id_produit": 28,
+      "quantite": 1,
+      "prix_unitaire": 367.55
+    },
+    {
+      "id_commande": 6,
+      "id_produit": 35,
+      "quantite": 2,
+      "prix_unitaire": 85.93
+    },
+    {
+      "id_commande": 6,
+      "id_produit": 2,
+      "quantite": 2,
+      "prix_unitaire": 376.42
+    },
+    {
+      "id_commande": 6,
+      "id_produit": 7,
+      "quantite": 3,
+      "prix_unitaire": 392.1
+    },
+    {
+      "id_commande": 6,
+      "id_produit": 16,
+      "quantite": 2,
+      "prix_unitaire": 74.01
+    },
+    {
+      "id_commande": 7,
+      "id_produit": 7,
+      "quantite": 3,
+      "prix_unitaire": 392.1
+    },
+    {
+      "id_commande": 7,
+      "id_produit": 25,
+      "quantite": 1,
+      "prix_unitaire": 334.13
+    },
+    {
+      "id_commande": 8,
+      "id_produit": 50,
+      "quantite": 2,
+      "prix_unitaire": 105.02
+    },
+    {
+      "id_commande": 8,
+      "id_produit": 36,
+      "quantite": 3,
+      "prix_unitaire": 233.89
+    },
+    {
+      "id_commande": 8,
+      "id_produit": 37,
+      "quantite": 3,
+      "prix_unitaire": 170.32
+    },
+    {
+      "id_commande": 9,
+      "id_produit": 24,
+      "quantite": 3,
+      "prix_unitaire": 47.44
+    },
+    {
+      "id_commande": 9,
+      "id_produit": 8,
+      "quantite": 2,
+      "prix_unitaire": 60.79
+    },
+    {
+      "id_commande": 9,
+      "id_produit": 25,
+      "quantite": 2,
+      "prix_unitaire": 334.13
+    },
+    {
+      "id_commande": 9,
+      "id_produit": 5,
+      "quantite": 2,
+      "prix_unitaire": 133.06
+    },
+    {
+      "id_commande": 10,
+      "id_produit": 36,
+      "quantite": 3,
+      "prix_unitaire": 233.89
+    },
+    {
+      "id_commande": 10,
+      "id_produit": 10,
+      "quantite": 2,
+      "prix_unitaire": 45.08
+    },
+    {
+      "id_commande": 10,
+      "id_produit": 49,
+      "quantite": 2,
+      "prix_unitaire": 195.59
+    },
+    {
+      "id_commande": 11,
+      "id_produit": 19,
+      "quantite": 2,
+      "prix_unitaire": 434.45
+    },
+    {
+      "id_commande": 12,
+      "id_produit": 45,
+      "quantite": 1,
+      "prix_unitaire": 311.61
+    },
+    {
+      "id_commande": 12,
+      "id_produit": 37,
+      "quantite": 3,
+      "prix_unitaire": 170.32
+    },
+    {
+      "id_commande": 12,
+      "id_produit": 11,
+      "quantite": 1,
+      "prix_unitaire": 393.74
+    },
+    {
+      "id_commande": 12,
+      "id_produit": 41,
+      "quantite": 3,
+      "prix_unitaire": 440.18
+    },
+    {
+      "id_commande": 13,
+      "id_produit": 22,
+      "quantite": 3,
+      "prix_unitaire": 138.35
+    },
+    {
+      "id_commande": 14,
+      "id_produit": 30,
+      "quantite": 3,
+      "prix_unitaire": 459.49
+    },
+    {
+      "id_commande": 14,
+      "id_produit": 38,
+      "quantite": 2,
+      "prix_unitaire": 19.24
+    },
+    {
+      "id_commande": 14,
+      "id_produit": 49,
+      "quantite": 2,
+      "prix_unitaire": 195.59
+    },
+    {
+      "id_commande": 15,
+      "id_produit": 46,
+      "quantite": 3,
+      "prix_unitaire": 41.47
+    },
+    {
+      "id_commande": 15,
+      "id_produit": 22,
+      "quantite": 1,
+      "prix_unitaire": 138.35
+    },
+    {
+      "id_commande": 15,
+      "id_produit": 10,
+      "quantite": 1,
+      "prix_unitaire": 45.08
+    },
+    {
+      "id_commande": 15,
+      "id_produit": 42,
+      "quantite": 1,
+      "prix_unitaire": 371.86
+    },
+    {
+      "id_commande": 16,
+      "id_produit": 8,
+      "quantite": 1,
+      "prix_unitaire": 60.79
+    },
+    {
+      "id_commande": 16,
+      "id_produit": 5,
+      "quantite": 2,
+      "prix_unitaire": 133.06
+    },
+    {
+      "id_commande": 17,
+      "id_produit": 20,
+      "quantite": 1,
+      "prix_unitaire": 267.53
+    },
+    {
+      "id_commande": 17,
+      "id_produit": 15,
+      "quantite": 1,
+      "prix_unitaire": 158.95
+    },
+    {
+      "id_commande": 17,
+      "id_produit": 26,
+      "quantite": 3,
+      "prix_unitaire": 488.46
+    },
+    {
+      "id_commande": 18,
+      "id_produit": 31,
+      "quantite": 3,
+      "prix_unitaire": 405.29
+    },
+    {
+      "id_commande": 18,
+      "id_produit": 35,
+      "quantite": 3,
+      "prix_unitaire": 85.93
+    },
+    {
+      "id_commande": 18,
+      "id_produit": 12,
+      "quantite": 1,
+      "prix_unitaire": 235.36
+    },
+    {
+      "id_commande": 18,
+      "id_produit": 28,
+      "quantite": 2,
+      "prix_unitaire": 367.55
+    },
+    {
+      "id_commande": 19,
+      "id_produit": 4,
+      "quantite": 3,
+      "prix_unitaire": 57.93
+    },
+    {
+      "id_commande": 19,
+      "id_produit": 48,
+      "quantite": 2,
+      "prix_unitaire": 84.6
+    },
+    {
+      "id_commande": 19,
+      "id_produit": 25,
+      "quantite": 3,
+      "prix_unitaire": 334.13
+    },
+    {
+      "id_commande": 20,
+      "id_produit": 46,
+      "quantite": 2,
+      "prix_unitaire": 41.47
+    },
+    {
+      "id_commande": 21,
+      "id_produit": 25,
+      "quantite": 2,
+      "prix_unitaire": 334.13
+    },
+    {
+      "id_commande": 21,
+      "id_produit": 15,
+      "quantite": 2,
+      "prix_unitaire": 158.95
+    },
+    {
+      "id_commande": 21,
+      "id_produit": 26,
+      "quantite": 3,
+      "prix_unitaire": 488.46
+    },
+    {
+      "id_commande": 21,
+      "id_produit": 17,
+      "quantite": 3,
+      "prix_unitaire": 177.83
+    },
+    {
+      "id_commande": 22,
+      "id_produit": 40,
+      "quantite": 1,
+      "prix_unitaire": 55.33
+    },
+    {
+      "id_commande": 22,
+      "id_produit": 20,
+      "quantite": 3,
+      "prix_unitaire": 267.53
+    },
+    {
+      "id_commande": 22,
+      "id_produit": 15,
+      "quantite": 1,
+      "prix_unitaire": 158.95
+    },
+    {
+      "id_commande": 22,
+      "id_produit": 46,
+      "quantite": 2,
+      "prix_unitaire": 41.47
+    },
+    {
+      "id_commande": 23,
+      "id_produit": 16,
+      "quantite": 2,
+      "prix_unitaire": 74.01
+    },
+    {
+      "id_commande": 23,
+      "id_produit": 6,
+      "quantite": 2,
+      "prix_unitaire": 433.33
+    },
+    {
+      "id_commande": 23,
+      "id_produit": 34,
+      "quantite": 1,
+      "prix_unitaire": 377.91
+    },
+    {
+      "id_commande": 24,
+      "id_produit": 14,
+      "quantite": 3,
+      "prix_unitaire": 233.94
+    },
+    {
+      "id_commande": 24,
+      "id_produit": 4,
+      "quantite": 3,
+      "prix_unitaire": 57.93
+    },
+    {
+      "id_commande": 24,
+      "id_produit": 3,
+      "quantite": 3,
+      "prix_unitaire": 341.89
+    },
+    {
+      "id_commande": 25,
+      "id_produit": 38,
+      "quantite": 3,
+      "prix_unitaire": 19.24
+    },
+    {
+      "id_commande": 25,
+      "id_produit": 5,
+      "quantite": 2,
+      "prix_unitaire": 133.06
+    },
+    {
+      "id_commande": 26,
+      "id_produit": 39,
+      "quantite": 3,
+      "prix_unitaire": 396.23
+    },
+    {
+      "id_commande": 26,
+      "id_produit": 22,
+      "quantite": 2,
+      "prix_unitaire": 138.35
+    },
+    {
+      "id_commande": 26,
+      "id_produit": 34,
+      "quantite": 3,
+      "prix_unitaire": 377.91
+    },
+    {
+      "id_commande": 26,
+      "id_produit": 30,
+      "quantite": 1,
+      "prix_unitaire": 459.49
+    },
+    {
+      "id_commande": 27,
+      "id_produit": 3,
+      "quantite": 3,
+      "prix_unitaire": 341.89
+    },
+    {
+      "id_commande": 27,
+      "id_produit": 35,
+      "quantite": 1,
+      "prix_unitaire": 85.93
+    },
+    {
+      "id_commande": 27,
+      "id_produit": 7,
+      "quantite": 1,
+      "prix_unitaire": 392.1
+    },
+    {
+      "id_commande": 27,
+      "id_produit": 10,
+      "quantite": 1,
+      "prix_unitaire": 45.08
+    },
+    {
+      "id_commande": 28,
+      "id_produit": 48,
+      "quantite": 3,
+      "prix_unitaire": 84.6
+    },
+    {
+      "id_commande": 28,
+      "id_produit": 20,
+      "quantite": 2,
+      "prix_unitaire": 267.53
+    },
+    {
+      "id_commande": 28,
+      "id_produit": 1,
+      "quantite": 1,
+      "prix_unitaire": 34.39
+    },
+    {
+      "id_commande": 29,
+      "id_produit": 24,
+      "quantite": 3,
+      "prix_unitaire": 47.44
+    },
+    {
+      "id_commande": 29,
+      "id_produit": 39,
+      "quantite": 1,
+      "prix_unitaire": 396.23
+    },
+    {
+      "id_commande": 29,
+      "id_produit": 29,
+      "quantite": 1,
+      "prix_unitaire": 303.06
+    },
+    {
+      "id_commande": 30,
+      "id_produit": 46,
+      "quantite": 2,
+      "prix_unitaire": 41.47
+    },
+    {
+      "id_commande": 30,
+      "id_produit": 33,
+      "quantite": 1,
+      "prix_unitaire": 58.77
+    }
+  ],
+  "paniers": [
+    {
+      "id": 1,
+      "utilisateur_id": 14,
+      "date_creation": "2025-04-01T17:24:17"
+    },
+    {
+      "id": 2,
+      "utilisateur_id": 3,
+      "date_creation": "2025-07-04T15:57:07"
+    },
+    {
+      "id": 3,
+      "utilisateur_id": 15,
+      "date_creation": "2025-03-13T14:49:07"
+    },
+    {
+      "id": 4,
+      "utilisateur_id": 20,
+      "date_creation": "2025-05-10T18:09:39"
+    },
+    {
+      "id": 5,
+      "utilisateur_id": 16,
+      "date_creation": "2025-05-09T03:11:02"
+    },
+    {
+      "id": 6,
+      "utilisateur_id": 9,
+      "date_creation": "2025-05-14T17:03:20"
+    },
+    {
+      "id": 7,
+      "utilisateur_id": 12,
+      "date_creation": "2025-04-05T13:56:06"
+    },
+    {
+      "id": 8,
+      "utilisateur_id": 18,
+      "date_creation": "2025-04-20T02:26:18"
+    },
+    {
+      "id": 9,
+      "utilisateur_id": 16,
+      "date_creation": "2025-06-24T15:19:34"
+    },
+    {
+      "id": 10,
+      "utilisateur_id": 7,
+      "date_creation": "2025-06-14T11:14:59"
+    },
+    {
+      "id": 11,
+      "utilisateur_id": 18,
+      "date_creation": "2025-06-23T21:15:44"
+    },
+    {
+      "id": 12,
+      "utilisateur_id": 6,
+      "date_creation": "2025-08-15T23:04:23"
+    },
+    {
+      "id": 13,
+      "utilisateur_id": 17,
+      "date_creation": "2025-04-24T11:38:10"
+    },
+    {
+      "id": 14,
+      "utilisateur_id": 3,
+      "date_creation": "2025-05-31T13:31:42"
+    },
+    {
+      "id": 15,
+      "utilisateur_id": 6,
+      "date_creation": "2025-06-06T11:50:02"
+    }
+  ],
+  "panier_produits": [
+    {
+      "id_panier": 1,
+      "id_produit": 36,
+      "quantite": 2
+    },
+    {
+      "id_panier": 2,
+      "id_produit": 42,
+      "quantite": 1
+    },
+    {
+      "id_panier": 2,
+      "id_produit": 20,
+      "quantite": 1
+    },
+    {
+      "id_panier": 3,
+      "id_produit": 28,
+      "quantite": 1
+    },
+    {
+      "id_panier": 3,
+      "id_produit": 31,
+      "quantite": 4
+    },
+    {
+      "id_panier": 3,
+      "id_produit": 48,
+      "quantite": 2
+    },
+    {
+      "id_panier": 4,
+      "id_produit": 26,
+      "quantite": 4
+    },
+    {
+      "id_panier": 4,
+      "id_produit": 35,
+      "quantite": 1
+    },
+    {
+      "id_panier": 4,
+      "id_produit": 2,
+      "quantite": 1
+    },
+    {
+      "id_panier": 4,
+      "id_produit": 15,
+      "quantite": 2
+    },
+    {
+      "id_panier": 5,
+      "id_produit": 17,
+      "quantite": 1
+    },
+    {
+      "id_panier": 5,
+      "id_produit": 7,
+      "quantite": 1
+    },
+    {
+      "id_panier": 5,
+      "id_produit": 3,
+      "quantite": 1
+    },
+    {
+      "id_panier": 5,
+      "id_produit": 32,
+      "quantite": 2
+    },
+    {
+      "id_panier": 6,
+      "id_produit": 18,
+      "quantite": 2
+    },
+    {
+      "id_panier": 6,
+      "id_produit": 35,
+      "quantite": 1
+    },
+    {
+      "id_panier": 6,
+      "id_produit": 9,
+      "quantite": 1
+    },
+    {
+      "id_panier": 7,
+      "id_produit": 31,
+      "quantite": 3
+    },
+    {
+      "id_panier": 8,
+      "id_produit": 43,
+      "quantite": 3
+    },
+    {
+      "id_panier": 8,
+      "id_produit": 26,
+      "quantite": 3
+    },
+    {
+      "id_panier": 8,
+      "id_produit": 36,
+      "quantite": 2
+    },
+    {
+      "id_panier": 8,
+      "id_produit": 4,
+      "quantite": 2
+    },
+    {
+      "id_panier": 9,
+      "id_produit": 7,
+      "quantite": 2
+    },
+    {
+      "id_panier": 9,
+      "id_produit": 27,
+      "quantite": 1
+    },
+    {
+      "id_panier": 9,
+      "id_produit": 18,
+      "quantite": 4
+    },
+    {
+      "id_panier": 9,
+      "id_produit": 33,
+      "quantite": 4
+    },
+    {
+      "id_panier": 10,
+      "id_produit": 22,
+      "quantite": 2
+    },
+    {
+      "id_panier": 10,
+      "id_produit": 36,
+      "quantite": 4
+    },
+    {
+      "id_panier": 10,
+      "id_produit": 4,
+      "quantite": 1
+    },
+    {
+      "id_panier": 10,
+      "id_produit": 17,
+      "quantite": 4
+    },
+    {
+      "id_panier": 11,
+      "id_produit": 29,
+      "quantite": 2
+    },
+    {
+      "id_panier": 11,
+      "id_produit": 46,
+      "quantite": 4
+    },
+    {
+      "id_panier": 12,
+      "id_produit": 18,
+      "quantite": 4
+    },
+    {
+      "id_panier": 12,
+      "id_produit": 40,
+      "quantite": 4
+    },
+    {
+      "id_panier": 12,
+      "id_produit": 35,
+      "quantite": 3
+    },
+    {
+      "id_panier": 13,
+      "id_produit": 42,
+      "quantite": 2
+    },
+    {
+      "id_panier": 13,
+      "id_produit": 4,
+      "quantite": 1
+    },
+    {
+      "id_panier": 14,
+      "id_produit": 12,
+      "quantite": 4
+    },
+    {
+      "id_panier": 14,
+      "id_produit": 16,
+      "quantite": 1
+    },
+    {
+      "id_panier": 14,
+      "id_produit": 3,
+      "quantite": 3
+    },
+    {
+      "id_panier": 14,
+      "id_produit": 23,
+      "quantite": 1
+    },
+    {
+      "id_panier": 15,
+      "id_produit": 20,
+      "quantite": 3
+    },
+    {
+      "id_panier": 15,
+      "id_produit": 37,
+      "quantite": 1
+    }
+  ],
+  "tickets_service_client": [
+    {
+      "id": 1,
+      "utilisateur_id": 10,
+      "sujet": "Demande de remboursement",
+      "description": "Courant tout rompre doigt appuyer cerveau famille. Répéter accord avoir risquer exprimer veille.",
+      "statut": "ouvert"
+    },
+    {
+      "id": 2,
+      "utilisateur_id": 16,
+      "sujet": "Produit défectueux",
+      "description": "Chien moment que humide mince ramener cesse groupe. De appartenir nous direction au égal soirée observer. Oreille consulter armée manger tuer.",
+      "statut": "fermé"
+    },
+    {
+      "id": 3,
+      "utilisateur_id": 20,
+      "sujet": "Demande de remboursement",
+      "description": "Soin plaire terme mine côte loi. Esprit arracher poussière durant. Vous davantage également terrain entraîner lentement bois soit.",
+      "statut": "ouvert"
+    },
+    {
+      "id": 4,
+      "utilisateur_id": 15,
+      "sujet": "Question sur une commande",
+      "description": "Elle respirer éloigner discussion ailleurs douze désespoir. Emporter point solitude aussitôt. Fin sentier saison minute miser.",
+      "statut": "ouvert"
+    },
+    {
+      "id": 5,
+      "utilisateur_id": 20,
+      "sujet": "Produit défectueux",
+      "description": "Nature reposer perdre poésie impossible avant auteur. Cheveu moment secret devoir exister.",
+      "statut": "en_cours"
+    },
+    {
+      "id": 6,
+      "utilisateur_id": 16,
+      "sujet": "Demande d'information",
+      "description": "Chaud roman lentement coûter folie. Confiance sauter début droit mince énergie espoir. Acheter agent sombre regarder trait. Vin personne beaucoup souffler tapis angoisse.",
+      "statut": "ouvert"
+    },
+    {
+      "id": 7,
+      "utilisateur_id": 19,
+      "sujet": "Problème de livraison",
+      "description": "Droit prêter parler ordre siège monsieur. Garder terminer auprès fortune sein. Fort mode animal salle.",
+      "statut": "fermé"
+    },
+    {
+      "id": 8,
+      "utilisateur_id": 18,
+      "sujet": "Produit défectueux",
+      "description": "Tout ennemi plante répandre plan âge demeurer. Demande tour regarder entretenir jaune monde double. Dormir me goutte armer casser.",
+      "statut": "en_cours"
+    },
+    {
+      "id": 9,
+      "utilisateur_id": 20,
+      "sujet": "Réclamation",
+      "description": "Continuer blond chance comment. Plaisir petit jusque faute.",
+      "statut": "ouvert"
+    },
+    {
+      "id": 10,
+      "utilisateur_id": 16,
+      "sujet": "Demande d'information",
+      "description": "Éclairer allumer ami toute. Nous joie prêt souvenir lire feuille.",
+      "statut": "ouvert"
+    }
+  ],
+  "durabilite": [
+    {
+      "id_produit": 11,
+      "label_ecologique": "GOTS",
+      "certification": "NF Environnement"
+    },
+    {
+      "id_produit": 47,
+      "label_ecologique": "Aucun",
+      "certification": "Aucune"
+    },
+    {
+      "id_produit": 22,
+      "label_ecologique": "FSC",
+      "certification": "Aucune"
+    },
+    {
+      "id_produit": 13,
+      "label_ecologique": "Bio",
+      "certification": "ISO 14001"
+    },
+    {
+      "id_produit": 34,
+      "label_ecologique": "Bio",
+      "certification": "EU Ecolabel"
+    },
+    {
+      "id_produit": 17,
+      "label_ecologique": "GOTS",
+      "certification": "Aucune"
+    },
+    {
+      "id_produit": 40,
+      "label_ecologique": "FSC",
+      "certification": "NF Environnement"
+    },
+    {
+      "id_produit": 49,
+      "label_ecologique": "FSC",
+      "certification": "NF Environnement"
+    },
+    {
+      "id_produit": 45,
+      "label_ecologique": "FSC",
+      "certification": "Aucune"
+    },
+    {
+      "id_produit": 42,
+      "label_ecologique": "GOTS",
+      "certification": "ISO 14001"
+    },
+    {
+      "id_produit": 30,
+      "label_ecologique": "Aucun",
+      "certification": "NF Environnement"
+    },
+    {
+      "id_produit": 2,
+      "label_ecologique": "Bio",
+      "certification": "Aucune"
+    },
+    {
+      "id_produit": 25,
+      "label_ecologique": "Aucun",
+      "certification": "ISO 14001"
+    },
+    {
+      "id_produit": 10,
+      "label_ecologique": "Bio",
+      "certification": "ISO 14001"
+    },
+    {
+      "id_produit": 35,
+      "label_ecologique": "Recyclé",
+      "certification": "EU Ecolabel"
+    },
+    {
+      "id_produit": 4,
+      "label_ecologique": "FSC",
+      "certification": "ISO 14001"
+    },
+    {
+      "id_produit": 38,
+      "label_ecologique": "Aucun",
+      "certification": "Aucune"
+    },
+    {
+      "id_produit": 8,
+      "label_ecologique": "Aucun",
+      "certification": "EU Ecolabel"
+    },
+    {
+      "id_produit": 18,
+      "label_ecologique": "Bio",
+      "certification": "Aucune"
+    },
+    {
+      "id_produit": 7,
+      "label_ecologique": "GOTS",
+      "certification": "EU Ecolabel"
+    }
+  ]
+}

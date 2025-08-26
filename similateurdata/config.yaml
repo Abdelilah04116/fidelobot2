@@ -1,0 +1,9 @@
+# Configuration du simulateur de données
+nb_produits: 50
+nb_categories: 8
+nb_utilisateurs: 20
+nb_commandes: 30
+nb_avis: 40
+nb_paniers: 15
+nb_tickets: 10
+nb_durabilite: 20

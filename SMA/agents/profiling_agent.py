@@ -11,6 +11,9 @@ from .base_agent import BaseAgent
 from models.message_models import AgentMessage, MessageType, MessageMetadata
 from models.agent_models import AgentType, AgentCapability, AgentResponse
 from models.context_models import UserContext
+from catalogue.backend.qdrant_client import client as qdrant_client, search_embedding
+# AGENT CONNECTÉ À QDRANT (vectoriel)
+# Utilisez search_embedding(...) pour la recherche de profils utilisateurs
 
 logger = logging.getLogger(__name__)
 

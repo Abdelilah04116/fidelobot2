@@ -1,8 +1,11 @@
 from .base_agent import BaseAgent
 from typing import Dict, Any
-from ..models.database import SessionLocal, Order, OrderItem, Product, User
+from catalogue.backend.database import SessionLocal
 from sqlalchemy.orm import Session
+from catalogue.backend.models import Order, OrderItem, Product, User
 
+# AGENT CONNECTÉ À POSTGRES (relationnel)
+# Utilisez SessionLocal() pour accéder aux données de commandes
 class OrderManagementAgent(BaseAgent):
     def __init__(self):
         super().__init__(

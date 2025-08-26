@@ -6,12 +6,15 @@ import os
 # Ajouter le chemin du projet pour importer le catalogue
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from catalogue.database.catalog_database import catalog_db
-from catalogue.database.catalog_models import Product, Category, Brand, ProductStatus
+from catalogue.backend.database import SessionLocal
+from catalogue.backend.models import Product, Category
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_, or_
 import logging
 from datetime import datetime
+from catalogue.backend.qdrant_client import client as qdrant_client, search_embedding
+# AGENT CONNECTÉ À QDRANT (vectoriel)
+# Utilisez search_embedding(...) pour la recherche sémantique de produits
 
 class ProductSearchAgent(BaseAgent):
     def __init__(self):
