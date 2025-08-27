@@ -27,6 +27,14 @@ class SummarizerAgent(BaseAgent):
         """
     
     async def execute(self, state: Dict[str, Any]) -> Dict[str, Any]:
+        # Vérifier si la réponse est déjà formatée par un autre agent
+        response_type = state.get("response_type", "")
+        response_text = state.get("response_text", "")
+        
+        # Si la réponse est déjà formatée (product_search, etc.), ne pas la modifier
+        if response_type in ["product_search", "availability_check", "price_check"] and response_text:
+            return state
+        
         content_type = state.get("content_type", "general")
         raw_data = state.get("raw_data", {})
         user_profile = state.get("user_profile", {})
@@ -178,7 +186,7 @@ class SummarizerAgent(BaseAgent):
         
         # Réponses contextuelles selon l'intention
         if intent == "greeting":
-            return "Bonjour ! Je suis votre assistant SMA spécialisé dans le e-commerce. Je peux vous aider à :\n\n• **Rechercher des produits** - Dites-moi ce que vous cherchez\n• **Vérifier vos commandes** - Suivi et statut de livraison\n• **Obtenir des recommandations** - Suggestions personnalisées\n• **Gérer votre panier** - Ajout, modification, validation\n\nQue souhaitez-vous faire aujourd'hui ?"
+            return "Bonjour ! Comment puis-je vous aider aujourd’hui ?"
         
         elif intent == "product_search":
             return f"Je vais rechercher des produits pour vous. Votre demande était : '{user_message}'\n\n🔍 **Recherche en cours...**\n\nSi aucun produit n'est trouvé, je peux vous proposer des alternatives ou des recommandations similaires."
@@ -194,7 +202,7 @@ class SummarizerAgent(BaseAgent):
         
         else:
             # Réponse générique mais dynamique
-            return f"Merci pour votre message ! Je suis votre assistant SMA et je peux vous aider avec :\n\n🛍️ **Produits** - Recherche, informations, disponibilité\n📦 **Commandes** - Suivi, statut, historique\n💡 **Recommandations** - Suggestions personnalisées\n🛒 **Panier** - Gestion et validation\n❓ **Aide** - Service client et support\n\nDites-moi ce qui vous intéresse !"
+            return "Merci pour votre message. Dites-moi simplement ce dont vous avez besoin (ex: rechercher un produit, suivre une commande, obtenir une recommandation)."
 
     async def summarize_cart(self, cart: Dict[str, Any]) -> str:
         if not cart or cart.get("is_empty"):

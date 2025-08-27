@@ -8,13 +8,14 @@ import asyncio
 # Importation des agents
 from ..agents.conversation_agent import ConversationAgent
 from ..agents.product_search_agent import ProductSearchAgent
-from ..agents.recommendation_agent import RecommendationAgent
+# from ..agents.recommendation_agent import RecommendationAgent  # DÉSACTIVÉ
 from ..agents.customer_profiling_agent import CustomerProfilingAgent
 from ..agents.summarizer_agent import SummarizerAgent
 from ..agents.escalation_agent import EscalationAgent
 from ..agents.order_management_agent import OrderManagementAgent
 from ..agents.cart_management_agent import CartManagementAgent
 from ..agents.voice_agent import VoiceAgent
+from ..agents.user_simulation_agent import UserSimulationAgent
 
 class ChatState(TypedDict):
     """État partagé entre tous les agents"""
@@ -61,12 +62,13 @@ class ChatBotOrchestrator:
             "voice_agent": VoiceAgent(),
             "conversation_agent": ConversationAgent(),
             "product_search_agent": ProductSearchAgent(),
-            "recommendation_agent": RecommendationAgent(),
+            # "recommendation_agent": RecommendationAgent(),  # DÉSACTIVÉ
             "profiling_agent": CustomerProfilingAgent(),
             "summarizer_agent": SummarizerAgent(),
             "escalation_agent": EscalationAgent(),
             "order_management_agent": OrderManagementAgent(),
-            "cart_management_agent": CartManagementAgent()
+            "cart_management_agent": CartManagementAgent(),
+            "user_simulation_agent": UserSimulationAgent()  # Ajout de l'agent utilisateur simulé
         }
         
         self.graph = self._build_graph()
@@ -80,12 +82,13 @@ class ChatBotOrchestrator:
         workflow.add_node("conversation_agent", self._conversation_node)
         workflow.add_node("profiling_agent", self._profiling_node)
         workflow.add_node("product_search_agent", self._product_search_node)
-        workflow.add_node("recommendation_agent", self._recommendation_node)
+        # workflow.add_node("recommendation_agent", self._recommendation_node)  # DÉSACTIVÉ
         workflow.add_node("order_management_agent", self._order_management_node)
         workflow.add_node("cart_management_agent", self._cart_management_node)
         workflow.add_node("summarizer_agent", self._summarizer_node)
         workflow.add_node("escalation_agent", self._escalation_node)
         workflow.add_node("final_response", self._final_response_node)
+        workflow.add_node("user_simulation_agent", self._user_simulation_node)
         
         # Définir les arêtes et conditions
         workflow.set_entry_point("voice_agent")
@@ -107,7 +110,7 @@ class ChatBotOrchestrator:
             self._route_after_profiling,
             {
                 "product_search_agent": "product_search_agent",
-                "recommendation_agent": "recommendation_agent", 
+                # "recommendation_agent": "recommendation_agent",  # DÉSACTIVÉ
                 "order_management_agent": "order_management_agent",
                 "cart_management_agent": "cart_management_agent",
                 "escalation_agent": "escalation_agent",
@@ -121,13 +124,13 @@ class ChatBotOrchestrator:
             "product_search_agent",
             self._route_after_product_search,
             {
-                "summarizer_agent": "summarizer_agent",
-                "recommendation_agent": "recommendation_agent"
+                "summarizer_agent": "summarizer_agent"
+                # "recommendation_agent": "recommendation_agent"  # DÉSACTIVÉ
             }
         )
         
         # Flux après recommandations
-        workflow.add_edge("recommendation_agent", "summarizer_agent")
+        # workflow.add_edge("recommendation_agent", "summarizer_agent")  # DÉSACTIVÉ
         workflow.add_edge("order_management_agent", "summarizer_agent")
         workflow.add_edge("cart_management_agent", "summarizer_agent")
         
@@ -143,6 +146,16 @@ class ChatBotOrchestrator:
         
         workflow.add_edge("escalation_agent", "final_response")
         workflow.add_edge("final_response", END)
+        
+        # Exemple : après le conversation_agent, possibilité d'appeler l'agent utilisateur simulé
+        workflow.add_conditional_edges(
+            "conversation_agent",
+            self._route_after_conversation,
+            {
+                "user_simulation_agent": "user_simulation_agent",
+                "profiling_agent": "profiling_agent"
+            }
+        )
         
         return workflow.compile()
     
@@ -215,21 +228,21 @@ class ChatBotOrchestrator:
         
         return state
     
-    async def _recommendation_node(self, state: ChatState) -> ChatState:
-        """Nœud de l'agent de recommandation"""
-        rec_state = {
-            **state,
-            "recommendation_type": self._determine_recommendation_type(state["intent"])
-        }
-        
-        result = await self.agents["recommendation_agent"].execute(rec_state)
-        
-        state.update({
-            "recommendations": result.get("recommendations", []),
-            "agents_used": state.get("agents_used", []) + ["recommendation_agent"]
-        })
-        
-        return state
+    # async def _recommendation_node(self, state: ChatState) -> ChatState:
+    #     """Nœud de l'agent de recommandation - DÉSACTIVÉ"""
+    #     rec_state = {
+    #         **state,
+    #         "recommendation_type": self._determine_recommendation_type(state["intent"])
+    #     }
+    #     
+    #     result = await self.agents["recommendation_agent"].execute(rec_state)
+    #     
+    #     state.update({
+    #         "recommendations": result.get("recommendations", []),
+    #         "agents_used": state.get("agents_used", []) + ["recommendation_agent"]
+    #     })
+    #     
+    #     return state
     
     async def _order_management_node(self, state: ChatState) -> ChatState:
         """Nœud de l'agent de gestion des commandes"""
@@ -333,6 +346,13 @@ class ChatBotOrchestrator:
         
         return state
     
+    async def _user_simulation_node(self, state: ChatState) -> ChatState:
+        """
+        Nœud d'exécution de l'agent utilisateur simulé
+        """
+        agent = self.agents["user_simulation_agent"]
+        return await agent.execute(state)
+    
     # Fonctions de routage conditionnel
     def _route_after_voice(self, state: ChatState) -> str:
         """Router après le traitement vocal"""
@@ -356,7 +376,7 @@ class ChatBotOrchestrator:
         if intent in ["product_search", "product_info", "availability_check", "list_products"]:
             return "product_search_agent"
         elif intent in ["recommendation", "gift_suggestion", "bestsellers"]:
-            return "recommendation_agent"
+            return "conversation_agent"  # DÉSACTIVÉ - utilise fallback personnalisé
         elif intent in ["order_status", "track_delivery", "order_management"]:
             return "order_management_agent"
         elif intent in ["cart_management", "cart_view", "view_cart", "panier"]:
@@ -376,7 +396,7 @@ class ChatBotOrchestrator:
         
         # Si pas de produits trouvés et intention de recommandation
         if not products and intent in ["gift_suggestion", "recommendation"]:
-            return "recommendation_agent"
+            return "conversation_agent"  # DÉSACTIVÉ - utilise fallback personnalisé
         else:
             return "summarizer_agent"
     
@@ -391,6 +411,16 @@ class ChatBotOrchestrator:
             return "escalation_agent"
         else:
             return "final_response"
+    
+    def _route_after_conversation(self, state: ChatState) -> str:
+        """
+        Route après le nœud de conversation :
+        - Si le state contient 'simulate_user' à True, on appelle l'agent utilisateur simulé
+        - Sinon, on continue le flux normal
+        """
+        if state.get("simulate_user"):
+            return "user_simulation_agent"
+        return "profiling_agent"
     
     # Fonctions utilitaires
     async def _extract_search_criteria(self, message: str) -> Dict[str, Any]:

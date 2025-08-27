@@ -17,7 +17,7 @@ class Product(Base):
     stock = Column(Integer, nullable=False)
     categorie_id = Column(Integer, ForeignKey("categories.id"))
     description_courte = Column(Text)
-    caracteristiques_structurées = Column(JSON)
+    caracteristiques_structurees = Column(JSON)
     categorie = relationship("Category", back_populates="produits")
     durabilite = relationship("Durabilite", uselist=False, back_populates="produit")
 

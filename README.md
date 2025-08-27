@@ -155,6 +155,34 @@ Utilisateur: "J'ai un problème avec ma commande"
 → Réponse: "Je vais vous aider. Pouvez-vous me donner plus de détails ?"
 ```
 
+### Exemple de scénario utilisateur simulé
+
+**Narratif** :
+1. L’agent s’inscrit ou se connecte.
+2. Il recherche un smartphone sous 500€.
+3. Il parcourt 3 pages de résultats, clique sur 2 produits.
+4. Il ajoute un produit au panier, hésite, le retire, compare avec un autre.
+5. Il pose une question sur la compatibilité 5G.
+6. Il ajoute finalement un produit au panier et passe commande.
+7. Il laisse un avis sur le produit acheté.
+8. Il contacte le service client pour une question sur la livraison.
+
+**Technique (pseudo-code)** :
+```python
+await agent.action_connect_or_signup()
+await agent.action_search_products(query="smartphone", filters={"price_max": 500})
+await agent.action_browse_results(pages=3)
+await agent.action_view_product(product_id=123)
+await agent.action_add_to_cart(product_id=123)
+await agent.action_hesitate_remove_from_cart(product_id=123)
+await agent.action_compare_products([123, 456])
+await agent.action_ask_question("Ce produit est-il compatible 5G ?")
+await agent.action_add_to_cart(product_id=456)
+await agent.action_checkout()
+await agent.action_leave_review(product_id=456, rating=5, comment="Super rapport qualité/prix !")
+await agent.action_contact_support("Où en est la livraison de ma commande ?")
+```
+
 ## 🔧 Configuration
 
 ### Variables d'environnement principales
@@ -363,3 +391,80 @@ Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
 - [ ] Intégration avec des systèmes de paiement
 - [ ] Support pour la réalité augmentée
 - [ ] Analytics prédictifs 
+
+## 🧑‍💻 Agent Utilisateur Intelligent (AUI)
+
+### Objectif
+Un agent SMA autonome qui simule un utilisateur humain sur le site e-commerce : navigation, recherche, ajout au panier, commande, avis, questions, etc. Il interagit avec l’API backend et/ou l’interface web, et simule des comportements humains variés (curiosité, hésitation, comparaison, etc.).
+
+### Architecture et intégration
+- **UserSimulationAgent** (nouveau module SMA) : Agent principal qui orchestre les actions utilisateur.
+- **Orchestrateur SMA** : Pilote le scénario, active l’agent utilisateur selon l’état ou la demande.
+- **API Backend** : L’agent utilise les endpoints REST/WebSocket pour toutes les actions (auth, recherche, panier, commande, avis…).
+- **Interface Web/Chat** : Permet d’observer, piloter ou dialoguer avec l’agent (optionnel : automatisation navigateur pour simuler la navigation réelle).
+- **Simulateur de comportements** : Génère des scénarios variés (aléatoires ou scriptés), avec pauses, hésitations, retours en arrière, etc.
+
+### Flux général
+1. L’agent s’inscrit ou se connecte via l’API.
+2. Il parcourt les catégories, consulte des produits, lit des avis.
+3. Il utilise la recherche, compare des produits, pose des questions.
+4. Il ajoute au panier, hésite, retire/ajoute, puis passe commande.
+5. Il laisse un avis, contacte le service client si besoin.
+6. Il reçoit et réagit à des suggestions personnalisées.
+7. Il peut dialoguer avec un humain via une interface chat.
+
+### Points d’intégration
+- Ajout du module `UserSimulationAgent` dans `SMA/agents/`
+- Intégration dans l’orchestrateur SMA (`SMA/core/orchestrator.py`)
+- Ajout d’un nœud dans le graphe LangGraph pour piloter l’agent
+- (Optionnel) Création d’une interface web/chat pour observer ou dialoguer avec l’agent 
+
+### Modules/Fichiers à modifier ou créer pour l’agent utilisateur intelligent
+
+| Module/Fichier | Action |
+|----------------|--------|
+| `SMA/agents/user_simulation_agent.py` | **Nouveau** : Agent principal simulant l’utilisateur |
+| `SMA/agents/base_agent.py` | Étendre pour supporter des actions web/API |
+| `SMA/core/orchestrator.py` | Ajouter la gestion des scénarios utilisateur et l’intégration de l’agent |
+| `SMA/models/user_models.py` | Étendre pour profils, préférences, historique |
+| `SMA/core/config.py` | Ajouter config pour scénarios, profils, etc. |
+| `SMA/agents/conversation_agent.py` | Permettre dialogue humain-agent |
+| `SMA/agents/customer_service_agent.py` | Interaction avec l’agent utilisateur |
+| `similateurdata/` | Réutiliser pour générer profils, historiques, etc. |
+| `interface/` | Ajouter un chat ou dashboard pour observer/interagir |
+| `README.md` | Ajouter guide de démo et documentation | 
+
+### Orchestration des interactions
+
+- **Agent utilisateur (UserSimulationAgent)** : pilote les actions comme un vrai client (connexion, navigation, achat, avis, support, etc.).
+- **Orchestrateur SMA** : reçoit les intentions/scénarios, active l’agent utilisateur ou d’autres agents selon le contexte.
+- **Backend/API** : l’agent utilise les endpoints REST/WebSocket pour toutes les actions (auth, recherche, panier, commande, avis…).
+- **Front-end (interface web/chat)** : permet d’observer, piloter ou dialoguer avec l’agent (optionnel : automatisation navigateur pour simuler la navigation réelle).
+- **Simulation comportementale** : l’agent peut suivre des scénarios scriptés ou générer des actions aléatoires, avec pauses, hésitations, retours en arrière, etc.
+- **Flux de données** :
+    1. L’agent envoie des requêtes à l’API backend (ex : POST /api/chat, GET /api/products/search, etc.).
+    2. Les réponses sont traitées par l’agent, qui décide de la prochaine action.
+    3. Les actions et états sont remontés à l’orchestrateur pour suivi et pilotage global.
+    4. (Optionnel) Les actions de l’agent peuvent être visualisées ou pilotées via une interface web/chat. 
+
+### Diagramme de séquence : Agent utilisateur intelligent
+
+```mermaid
+sequenceDiagram
+    participant AUI as Agent Utilisateur Intelligent
+    participant API as API Backend
+    participant Front as Interface Web
+    participant SMA as Orchestrateur SMA
+    participant AgentCS as Agent Service Client
+
+    AUI->>API: S’inscrit/se connecte
+    AUI->>API: Recherche produits
+    API-->>AUI: Résultats produits
+    AUI->>API: Ajoute au panier
+    AUI->>API: Pose une question (ex: compatibilité)
+    API-->>AUI: Réponse (via AgentCS si besoin)
+    AUI->>API: Passe commande
+    AUI->>API: Laisse un avis
+    AUI->>API: Contacte le support
+    API-->>AUI: Réponse support (AgentCS)
+``` 

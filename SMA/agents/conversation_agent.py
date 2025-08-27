@@ -83,44 +83,33 @@ class ConversationAgent(BaseAgent):
             return "customer_service"
         elif any(word in message_lower for word in ["liste", "produits", "catalogue"]):
             return "product_search"
+        elif any(word in message_lower for word in ["avez", "disponible", "stock", "avoir", "est ce que"]):
+            return "availability_check"
+        elif any(word in message_lower for word in ["prix", "coût", "tarif", "combien"]):
+            return "price_check"
         
-        # Pour les cas plus complexes, utiliser l'IA
-        prompt = f"""
-        Analysez l'intention de ce message utilisateur dans le contexte d'un site e-commerce:
-        "{message}"
+        # Mode dégradé : détection basique sans IA
+        # Recherche de mots-clés produits
+        product_keywords = ["iphone", "samsung", "laptop", "ordinateur", "smartphone", "tablette", "écran", "clavier", "souris"]
+        if any(keyword in message_lower for keyword in product_keywords):
+            return "product_search"
         
-        Intentions possibles:
-        - product_search: recherche de produits, demande de liste, catalogue
-        - product_info: informations sur un produit spécifique
-        - recommendation: demande de recommandations, suggestions
-        - order_status: vérification de commande, suivi
-        - cart_management: gestion du panier
-        - customer_service: service client, aide, problèmes
-        - promotion_inquiry: demande de promotions
-        - gift_suggestion: suggestion de cadeau
-        - availability_check: vérification de disponibilité
-        - return_policy: politique de retour
-        - greeting: salutations
-        - general_chat: conversation générale
-        
-        Répondez uniquement par l'intention détectée.
-        """
-        
-        intent = await self.generate_response(prompt)
-        return intent.strip().lower()
+        # Par défaut, considérer comme recherche de produit
+        return "product_search"
     
     def determine_agents(self, intent: str) -> List[str]:
         """Déterminer quels agents solliciter selon l'intention"""
         agent_mapping = {
-            "product_search": ["product_search_agent", "summarizer_agent"],
-            "product_info": ["product_search_agent", "summarizer_agent"],
-            "recommendation": ["recommendation_agent", "customer_profiling_agent"],
+            "product_search": ["product_search_agent"],  # Sans summarizer pour éviter les conflits
+            "product_info": ["product_search_agent"],
+            "recommendation": ["personalized_fallback"],  # Désactivé - utilise fallback
             "order_status": ["order_management_agent"],
             "cart_management": ["product_search_agent"],
             "customer_service": ["escalation_agent"],
             "promotion_inquiry": ["product_search_agent"],
-            "gift_suggestion": ["recommendation_agent", "customer_profiling_agent"],
-            "availability_check": ["product_search_agent"],
+            "gift_suggestion": ["personalized_fallback"],  # Désactivé - utilise fallback
+            "availability_check": ["product_search_agent"],  # Route vers product_search_agent
+            "price_check": ["product_search_agent"],  # Route vers product_search_agent
             "return_policy": ["customer_service_agent"],
             "general_chat": ["summarizer_agent"]
         }
@@ -130,29 +119,24 @@ class ConversationAgent(BaseAgent):
 
     async def generate_personalized_fallback_response(self, user_message: str, user_profile: dict) -> str:
         """Générer une réponse personnalisée selon le profil, l'historique d'achat et les services du site."""
-        # Récupérer l'historique d'achat et les services du site si disponibles
-        purchase_history = user_profile.get("purchase_history", [])
+        # Mode dégradé sans IA
         first_name = user_profile.get("first_name", "")
         segment = user_profile.get("segment", "client")
-        # Exemple de services/produits (à adapter selon ton projet)
-        services = user_profile.get("services", [
-            "Livraison rapide",
-            "Paiement sécurisé",
-            "Support client 24/7",
-            "Large choix de produits"
-        ])
-        # Construire un prompt personnalisé
-        prompt = f"""
-Vous êtes l'assistant principal d'un site e-commerce.
-L'utilisateur a envoyé : '{user_message}'
-Profil utilisateur : prénom = {first_name}, segment = {segment}
-Historique d'achat : {purchase_history if purchase_history else 'aucun achat enregistré'}
-Services proposés : {', '.join(services)}
-
-Générez une réponse utile, personnalisée et engageante, en valorisant les services du site et en tenant compte du profil et de l'historique d'achat. Si possible, proposez un produit ou service pertinent.
-"""
-        response = await self.generate_response(prompt)
-        return response.strip()
+        
+        # Réponses prédéfinies selon le contexte
+        if "bonjour" in user_message.lower() or "salut" in user_message.lower():
+            greeting = f"Bonjour {first_name} ! " if first_name else "Bonjour ! "
+            return greeting + "Comment puis-je vous aider aujourd'hui ? Je peux vous aider à trouver des produits, vérifier la disponibilité, ou vous donner des recommandations."
+        
+        elif "merci" in user_message.lower():
+            return "Je vous en prie ! N'hésitez pas si vous avez d'autres questions. Notre équipe est là pour vous accompagner."
+        
+        elif "au revoir" in user_message.lower() or "bye" in user_message.lower():
+            return "Au revoir ! N'hésitez pas à revenir si vous avez besoin d'aide. Bonne journée !"
+        
+        else:
+            # Réponse générique mais utile
+            return f"Merci pour votre message ! Je suis là pour vous aider avec nos produits et services. Que souhaitez-vous faire aujourd'hui ?"
 
     def _contains_product_keywords(self, message: str) -> bool:
         """Détecte si le message contient des mots-clés produits ou catégories e-commerce."""
