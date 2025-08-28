@@ -31,7 +31,6 @@ from typing import Optional, Generator
 from contextlib import contextmanager
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.pool import StaticPool
 from qdrant_client import QdrantClient
 from qdrant_client.http.exceptions import UnexpectedResponse
 import logging
@@ -72,10 +71,9 @@ class DatabaseManager:
             # URL de connexion PostgreSQL
             postgres_url = f"postgresql://{postgres_user}:{postgres_password}@{postgres_host}:{postgres_port}/{postgres_db}"
             
-            # Créer l'engine PostgreSQL
+            # Créer l'engine PostgreSQL (pool par défaut de SQLAlchemy)
             self._postgres_engine = create_engine(
                 postgres_url,
-                poolclass=StaticPool,
                 pool_pre_ping=True,
                 pool_recycle=300,
                 echo=False  # Mettre à True pour debug SQL
@@ -117,8 +115,8 @@ class DatabaseManager:
         """Teste les connexions aux bases de données"""
         # Test PostgreSQL
         try:
-            with self._postgres_session_factory() as session:
-                session.execute(text("SELECT 1"))
+            with self._postgres_engine.connect() as conn:
+                conn.execute(text("SELECT 1"))
             logger.info("✅ Connexion PostgreSQL OK")
         except Exception as e:
             logger.error(f"❌ Erreur connexion PostgreSQL: {str(e)}")
@@ -135,10 +133,8 @@ class DatabaseManager:
     @contextmanager
     def get_postgres_session(self) -> Generator[Session, None, None]:
         """
-        Context manager pour obtenir une session PostgreSQL
-        Usage:
-            with db_manager.get_postgres_session() as session:
-                result = session.query(Product).all()
+        Context manager pour obtenir une session PostgreSQL (lecture par défaut).
+        Les commits doivent être effectués explicitement par les fonctions d'écriture.
         """
         if not self._initialized:
             self.initialize()
@@ -146,7 +142,6 @@ class DatabaseManager:
         session = self._postgres_session_factory()
         try:
             yield session
-            session.commit()
         except Exception as e:
             session.rollback()
             logger.error(f"Erreur dans la session PostgreSQL: {str(e)}")

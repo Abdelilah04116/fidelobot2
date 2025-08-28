@@ -23,10 +23,63 @@ class CartManagementAgent:
         self.logger = logging.getLogger("cart_management_agent")
 
     def get_db(self):
-            db = SessionLocal()
+        db = SessionLocal()
         try:
             yield db
         finally:
+            db.close()
+    
+    async def execute(self, state: dict) -> dict:
+        """
+        Exécution orchestrée par le SMA.
+        Attend dans state: cart_action in {view, add, remove, clear}, user_id, product_id, quantity
+        """
+        action = state.get("cart_action", "view")
+        user_id = state.get("user_id")
+        product_id = state.get("product_id")
+        quantity = state.get("quantity", 1)
+        if not isinstance(user_id, int) or user_id <= 0:
+            return {
+                "response_text": "Pour gérer le panier, veuillez vous connecter ou fournir un identifiant utilisateur.",
+                "cart": {"items": [], "total_items": 0, "total_price": 0.0, "is_empty": True}
+            }
+        db: Optional[Session] = None
+        try:
+            db = SessionLocal()
+            if action == "add":
+            if not product_id:
+                    return {"response_text": "Spécifiez l'ID du produit à ajouter (ex: ajouter produit 58)", "cart": self.get_cart(db, user_id)}
+                cart = self.add_to_cart(db, user_id, product_id, quantite=quantity)
+                return {"response_text": f"Produit {product_id} ajouté au panier.", "cart": cart}
+            elif action == "remove":
+            if not product_id:
+                    return {"response_text": "Spécifiez l'ID du produit à retirer (ex: retirer produit 58)", "cart": self.get_cart(db, user_id)}
+                cart = self.remove_from_cart(db, user_id, product_id)
+                return {"response_text": f"Produit {product_id} retiré du panier.", "cart": cart}
+            elif action == "clear":
+                self.clear_cart(db, user_id)
+                return {"response_text": "Panier vidé avec succès.", "cart": {"items": [], "total_items": 0, "total_price": 0.0, "is_empty": True}}
+            else:  # view
+                cart = self.get_cart(db, user_id)
+                items = cart.get("produits", [])
+                if not items:
+                    return {"response_text": "Votre panier est vide.", "cart": {"items": [], "total_items": 0, "total_price": 0.0, "is_empty": True}}
+                total = cart.get("total", 0.0)
+                # Adapter la structure à l'UI SMA (items, total_price)
+                ui_cart = {
+                    "items": [{"product_id": it["id"], "name": it["nom"], "quantity": it["quantite"], "total": it["total_partiel"]} for it in items],
+                    "total_items": sum(it["quantite"] for it in items),
+                    "total_price": total,
+                    "is_empty": False,
+                }
+                return {"response_text": "Voici votre panier.", "cart": ui_cart}
+        except HTTPException as e:
+            return {"response_text": e.detail, "cart": {"items": [], "total_items": 0, "total_price": 0.0, "is_empty": True}}
+        except Exception as e:
+            self.logger.error(f"Erreur execute panier: {e}")
+            return {"response_text": "Erreur lors de la gestion du panier.", "cart": {"items": [], "total_items": 0, "total_price": 0.0, "is_empty": True}}
+        finally:
+            if db:
                 db.close()
     
     def _get_or_create_panier(self, db: Session, user_id: int) -> Panier:
@@ -42,7 +95,7 @@ class CartManagementAgent:
         if quantite <= 0:
             raise HTTPException(status_code=400, detail="La quantité doit être positive.")
         product = db.query(Product).filter_by(id=product_id).first()
-            if not product:
+        if not product:
             raise HTTPException(status_code=404, detail="Produit introuvable.")
         if product.stock < quantite:
             raise HTTPException(status_code=400, detail="Stock insuffisant.")
@@ -53,7 +106,7 @@ class CartManagementAgent:
         else:
             panier_produit = PanierProduit(id_panier=panier.id, id_produit=product_id, quantite=quantite)
             db.add(panier_produit)
-            db.commit()
+        db.commit()
         return self.get_cart(db, user_id)
 
     def remove_from_cart(self, db: Session, user_id: int, product_id: int):
@@ -65,9 +118,9 @@ class CartManagementAgent:
             raise HTTPException(status_code=404, detail="Produit non présent dans le panier.")
         if panier_produit.quantite > 1:
             panier_produit.quantite -= 1
-            else:
+        else:
             db.delete(panier_produit)
-            db.commit()
+        db.commit()
         return self.get_cart(db, user_id)
 
     def get_cart(self, db: Session, user_id: int):

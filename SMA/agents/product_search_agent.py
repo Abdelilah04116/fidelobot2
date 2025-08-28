@@ -51,10 +51,18 @@ class ProductSearchAgent(BaseAgent):
     
     async def execute(self, state: Dict[str, Any]) -> Dict[str, Any]:
         try:
-            query = state.get("search_query", state.get("user_message", ""))
+            query = state.get("search_query", state.get("user_message", "")).strip()
             category = state.get("category", "")
             max_price = state.get("max_price", None)
             limit = min(state.get("limit", self.default_limit), self.max_limit)
+
+            # Nouveau: détection simple d'une question de disponibilité directe
+            if state.get("force_availability") or self._is_availability_query(query):
+                avail = await self.check_product_availability_safe(query)
+                state["products"] = avail.get("products", [])
+                state["response_text"] = avail.get("message", "")
+                state["response_type"] = "product_availability"
+                return state
             
             # Valider les paramètres de recherche
             validation_result = self.validate_search_params(query, category, max_price, limit)
@@ -107,6 +115,71 @@ class ProductSearchAgent(BaseAgent):
             state["response_text"] = "Désolé, je rencontre un problème technique. Pouvez-vous reformuler votre demande ?"
             return state
     
+    def _is_availability_query(self, query: str) -> bool:
+        if not query:
+            return False
+        q = query.lower()
+        triggers = [
+            "est ce que vous avez", "est-ce que vous avez", "avez-vous", "avez vous",
+            "disponible", "en stock", "stock", "avez", "as tu", "dernier", "latest"
+        ]
+        return any(t in q for t in triggers)
+
+    def _extract_candidate_name(self, query: str) -> str:
+        q = query.lower()
+        # Retirer expressions courantes et mots vides
+        junk = [
+            "est ce que vous avez", "est-ce que vous avez", "avez-vous", "avez vous",
+            "le produit", "produit", "le", "la", "les", "de", "des", "du", "un", "une",
+            "dernier", "nouveau", "latest", "nouvelle", "dernier modèle", "modele", "modèle"
+        ]
+        for p in junk:
+            q = q.replace(p, " ")
+        # Nettoyage et normalisation simple
+        tokens = [w for w in q.split() if len(w) > 1]
+        return " ".join(tokens).strip()
+
+    async def check_product_availability_safe(self, original_query: str) -> Dict[str, Any]:
+        try:
+            candidate = self._extract_candidate_name(original_query)
+            if not candidate:
+                return {"message": "Pouvez-vous préciser le nom du produit ?", "products": []}
+            keywords = [k for k in candidate.split() if len(k) > 1]
+            if not keywords:
+                return {"message": "Pouvez-vous préciser le nom du produit ?", "products": []}
+            with get_postgres_session() as session:
+                # Construire une recherche stricte: tous les mots-clés doivent apparaître dans nom ou description
+                conditions = []
+                for kw in keywords:
+                    like_kw = f"%{kw}%"
+                    conditions.append(or_(Product.nom.ilike(like_kw), Product.description_courte.ilike(like_kw)))
+                # AND sur toutes les conditions
+                qry = session.query(Product).filter(and_(*conditions)).order_by(Product.stock.desc(), Product.prix.asc())
+                results = qry.limit(5).all()
+                if results:
+                    # Si un seul résultat très pertinent (tous mots-clés), répondre oui avec prix
+                    p = results[0]
+                    available = int(getattr(p, 'stock', 0) or 0) > 0
+                    if available:
+                        msg = f"Oui, nous avons '{p.nom}' en stock, au prix de {float(p.prix)}€."
+                    else:
+                        msg = f"'{p.nom}' n'est pas en stock actuellement. Il devrait revenir prochainement."
+                    return {
+                        "message": msg,
+                        "products": [{
+                            "id": p.id,
+                            "name": p.nom,
+                            "price": float(p.prix),
+                            "stock_quantity": int(getattr(p, 'stock', 0) or 0),
+                            "available": available
+                        }]
+                    }
+                # Aucun résultat SQL strict: répondre clairement
+                return {"message": "Désolé, nous ne vendons pas ce type de produit pour le moment.", "products": []}
+        except Exception as e:
+            self.logger.error(f"Erreur disponibilité: {e}")
+            return {"message": "Impossible de vérifier la disponibilité pour le moment.", "products": []}
+
     def validate_search_params(self, query: str, category: str, max_price: float, limit: int) -> Dict[str, Any]:
         """Valider les paramètres de recherche"""
         # Validation de la requête
@@ -137,12 +210,12 @@ class ProductSearchAgent(BaseAgent):
             # Recherche de disponibilité
             if len(products) == 1:
                 product = products[0]
-                return f"✅ **Oui, nous avons le {product['name']} !**\n\n📱 **{product['name']}** - {product['price']}€\n📦 **Stock** : {product['stock_quantity']} unités disponibles\n📋 **Description** : {product['description']}\n🏷️ **Catégorie** : {product['category']}"
+                return f"✅ **Oui, nous avons le {product['name']} !**\n\n📱 **{product['name']}** - {product['price']}€\n📦 **Stock** : {product.get('stock_quantity', 0)} unités disponibles\n📋 **Description** : {product.get('description', '')}\n🏷️ **Catégorie** : {product.get('category', '')}"
             else:
                 # Plusieurs produits trouvés
-                response = f"✅ **Oui, nous avons {len(products)} produit(s) correspondant à votre recherche !**\n\n"
+                response = f"✅ **Oui, nous avons {len(products)} produit(s) correspondant à votre demande !**\n\n"
                 for i, product in enumerate(products[:5], 1):  # Limiter à 5 produits
-                    response += f"{i}. **{product['name']}** - {product['price']}€ ({product['stock_quantity']} en stock)\n"
+                    response += f"{i}. **{product['name']}** - {product['price']}€ ({product.get('stock_quantity', 0)} en stock)\n"
                 if len(products) > 5:
                     response += f"\n... et {len(products) - 5} autre(s) produit(s)"
                 return response
@@ -151,7 +224,7 @@ class ProductSearchAgent(BaseAgent):
             # Recherche de prix
             if len(products) == 1:
                 product = products[0]
-                return f"💰 **Prix du {product['name']} : {product['price']}€**\n\n📱 **{product['name']}**\n📦 **Stock** : {product['stock_quantity']} unités\n📋 **Description** : {product['description']}"
+                return f"💰 **Prix du {product['name']} : {product['price']}€**\n\n📱 **{product['name']}**\n📦 **Stock** : {product.get('stock_quantity', 0)} unités\n📋 **Description** : {product.get('description', '')}"
             else:
                 response = f"💰 **Voici les prix pour {len(products)} produit(s) :**\n\n"
                 for product in products[:5]:
@@ -162,7 +235,7 @@ class ProductSearchAgent(BaseAgent):
             # Recherche générale
             if len(products) == 1:
                 product = products[0]
-                return f"🔍 **J'ai trouvé exactement ce que vous cherchez !**\n\n📱 **{product['name']}** - {product['price']}€\n📦 **Stock** : {product['stock_quantity']} unités\n📋 **Description** : {product['description']}\n🏷️ **Catégorie** : {product['category']}"
+                return f"🔍 **J'ai trouvé exactement ce que vous cherchez !**\n\n📱 **{product['name']}** - {product['price']}€\n📦 **Stock** : {product.get('stock_quantity', 0)} unités\n📋 **Description** : {product.get('description', '')}\n🏷️ **Catégorie** : {product.get('category', '')}"
             else:
                 response = f"🔍 **J'ai trouvé {len(products)} produit(s) pour votre recherche :**\n\n"
                 for i, product in enumerate(products[:5], 1):

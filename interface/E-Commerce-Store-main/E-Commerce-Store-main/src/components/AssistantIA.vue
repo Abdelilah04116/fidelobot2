@@ -92,12 +92,53 @@
 
 <script setup lang="ts">
 import { ref, nextTick, onMounted, onUnmounted } from 'vue'
+import { useCartStore } from '../pinia/cartStore.ts'
 
+const cartStore = useCartStore()
 const open = ref(false)
 const userInput = ref('')
 const recording = ref(false)
 const micDenied = ref(false)
 const transcribing = ref(false)
+
+// Génération d'un ID de session unique
+function generateSessionId(): string {
+  return 'fidelo-' + Math.random().toString(36).substr(2, 9)
+}
+
+function formatMarkdownLite(text: string): string {
+  if (!text) return ''
+  let html = text
+  // Échapper basique des chevrons pour éviter l'injection
+  html = html.replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  // Gras **texte**
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+  // Italique *texte*
+  html = html.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>')
+  // Code `texte`
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>')
+  // Listes - item → puces
+  html = html.replace(/^\s*-\s+(.*)$/gm, '<div class="product-item">• $1</div>')
+  // Titres ### / ## / # → span accentués
+  html = html.replace(/^###\s+(.*)$/gm, '<span style="font-weight:600">$1</span>')
+  html = html.replace(/^##\s+(.*)$/gm, '<span style="font-weight:600">$1</span>')
+  html = html.replace(/^#\s+(.*)$/gm, '<span style="font-weight:700">$1</span>')
+  // Retours à la ligne
+  html = html.replace(/\n/g, '<br/>')
+  return html
+}
+
+function removeEmojis(text: string): string {
+  if (!text) return ''
+  // Supprimer la plupart des emojis
+  return text
+    .replace(/[\u{1F1E6}-\u{1F1FF}]/gu, '') // drapeaux
+    .replace(/[\u{1F300}-\u{1FAFF}]/gu, '') // pictogrammes & émoticônes
+    .replace(/[\u{1F900}-\u{1F9FF}]/gu, '') // Supplemental Symbols and Pictographs
+    .replace(/[\u2600-\u{27BF}]/g, '') // Misc symbols
+    .replace(/[\uFE0E\uFE0F\u200D]/g, '') // variation selectors + ZWJ
+}
+
 const fileInput = ref<HTMLInputElement | null>(null)
 const chatBody = ref<HTMLElement | null>(null)
 const imagePreview = ref<string | null>(null)
@@ -119,11 +160,6 @@ interface Message {
 const messages = ref<Message[]>([
   { role: 'assistant', content: 'Bonjour ! Je suis Fidelo, votre assistant shopping. Comment puis-je vous aider ?' }
 ])
-
-// Génération d'un ID de session unique
-function generateSessionId() {
-  return 'fidelo-' + Math.random().toString(36).substr(2, 9)
-}
 
 // Connexion WebSocket
 function connectWebSocket() {
@@ -190,29 +226,35 @@ function handleWebSocketMessage(data: any) {
       return
     }
     
-    let responseContent = data.message
+    let responseContent = ''
+    // Formater le message principal (markdown-lite → HTML)
+    if (data.message) {
+      const clean = removeEmojis(String(data.message))
+      responseContent += formatMarkdownLite(clean)
+    }
     
-    // Ajouter les produits si disponibles
+    // Ajouter les produits si disponibles (sans entête)
     if (data.products && data.products.length > 0) {
       responseContent += '<div class="products-suggestions">'
-      responseContent += '<h4>Produits suggérés :</h4>'
       data.products.forEach((product: any) => {
-        responseContent += `<div class="product-item">• ${product.name} - ${product.price || 'Prix non disponible'}</div>`
+        const nameRaw = product.name ?? 'Produit'
+        const name = removeEmojis(String(nameRaw))
+        const price = (product.price !== undefined && product.price !== null) ? product.price : 'Prix non disponible'
+        responseContent += `<div class="product-item">• ${name} - ${price}</div>`
       })
       responseContent += '</div>'
     }
     
-    // Ajouter le panier si disponible
+    // Détecter si c'est une réponse de panier et ouvrir la modale
     if (data.cart && Object.keys(data.cart).length > 0) {
-      responseContent += '<div class="cart-info">'
-      responseContent += `<h4>Votre panier :</h4>`
-      if (data.cart.items && data.cart.items.length > 0) {
-        data.cart.items.forEach((item: any) => {
-          responseContent += `<div class="cart-item">• ${item.name} x${item.quantity} - ${item.total}€</div>`
-        })
-      }
-      responseContent += `<div class="cart-total">Total : ${data.cart.total_price || 0}€</div>`
-      responseContent += '</div>'
+      // Ouvrir automatiquement la modale du panier
+      setTimeout(() => {
+        cartStore.cartOn()
+      }, 500) // Petit délai pour que le message s'affiche d'abord
+    }
+    
+    if (!responseContent) {
+      responseContent = 'Je n\'ai pas pu formater la réponse.'
     }
     
     messages.value.push({ role: 'assistant', content: responseContent })
@@ -370,18 +412,21 @@ onUnmounted(() => {
   position: fixed;
   bottom: 2rem;
   right: 2rem;
-  background: transparent;
+  background: #2563eb;
   border: none;
   border-radius: 50%;
   width: 80px;
   height: 80px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
   cursor: pointer;
-  z-index: 1000;
+  z-index: 9999;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: box-shadow 0.2s;
+  /* Debug styles */
+  border: 3px solid red;
+  opacity: 1;
 }
 .assistant-fab:hover {
   box-shadow: 0 4px 16px rgba(37,99,235,0.25);
@@ -713,3 +758,718 @@ onUnmounted(() => {
   }
 }
 </style>
+
+
+    websocket.close()
+
+  }
+
+  if (reconnectTimer) {
+
+    clearTimeout(reconnectTimer)
+
+  }
+
+})
+
+</script>
+
+
+
+<style scoped>
+
+.assistant-fab {
+
+  position: fixed;
+
+  bottom: 2rem;
+
+  right: 2rem;
+
+  background: transparent;
+
+  border: none;
+
+  border-radius: 50%;
+
+  width: 80px;
+
+  height: 80px;
+
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+
+  cursor: pointer;
+
+  z-index: 1000;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  transition: box-shadow 0.2s;
+
+}
+
+.assistant-fab:hover {
+
+  box-shadow: 0 4px 16px rgba(37,99,235,0.25);
+
+}
+
+.assistant-overlay {
+
+  position: fixed;
+
+  inset: 0;
+
+  background: rgba(0,0,0,0.08);
+
+  z-index: 1001;
+
+}
+
+.assistant-modal.chatbot {
+
+  position: fixed;
+
+  bottom: 7.5rem;
+
+  right: 2rem;
+
+  width: 500px;
+
+  max-width: 99vw;
+
+  height: 600px;
+
+  max-height: 90vh;
+
+  background: #fff;
+
+  border-radius: 2rem;
+
+  box-shadow: 0 8px 32px rgba(37,99,235,0.18), 0 1.5px 8px rgba(0,0,0,0.08);
+
+  z-index: 1002;
+
+  display: flex;
+
+  flex-direction: column;
+
+  overflow: hidden;
+
+  animation: assistant-pop 0.18s cubic-bezier(.4,1.4,.6,1) both;
+
+}
+
+@keyframes assistant-pop {
+
+  0% { transform: scale(0.95) translateY(30px); opacity: 0; }
+
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+
+}
+
+.assistant-header {
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  padding: 1.5rem 2rem;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  background: #f1f5f9;
+
+}
+
+.connection-status {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 0.5rem;
+
+}
+
+.status-connected {
+
+  color: #10b981;
+
+  font-size: 1.2rem;
+
+}
+
+.status-disconnected {
+
+  color: #ef4444;
+
+  font-size: 1.2rem;
+
+}
+
+.close-btn {
+
+  background: none;
+
+  border: none;
+
+  font-size: 1.25rem;
+
+  color: #2563eb;
+
+  cursor: pointer;
+
+  padding: 0 0.25rem;
+
+  line-height: 1;
+
+}
+
+.assistant-body.chatbot-body {
+
+  padding: 2rem 1.5rem 1rem 1.5rem;
+
+  background: #f8fafc;
+
+  color: #1e293b;
+
+  font-size: 1rem;
+
+  flex: 1 1 auto;
+
+  overflow-y: auto;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 0.7rem;
+
+}
+
+.chat-message {
+
+  display: flex;
+
+  align-items: flex-end;
+
+  gap: 0.7rem;
+
+  margin-bottom: 0.2rem;
+
+}
+
+.chat-message.user {
+
+  flex-direction: row-reverse;
+
+}
+
+.bubble {
+
+  background: #fff;
+
+  color: #1e293b;
+
+  border-radius: 1.2rem;
+
+  padding: 0.8rem 1.2rem;
+
+  max-width: 70%;
+
+  box-shadow: 0 1px 4px #2563eb11;
+
+  font-size: 1.05rem;
+
+  word-break: break-word;
+
+}
+
+.chat-message.user .bubble {
+
+  background: #2563eb;
+
+  color: #fff;
+
+  border-bottom-right-radius: 0.4rem;
+
+  border-bottom-left-radius: 1.2rem;
+
+}
+
+.chat-message.assistant .bubble {
+
+  background: #fff;
+
+  color: #2563eb;
+
+  border-bottom-left-radius: 0.4rem;
+
+  border-bottom-right-radius: 1.2rem;
+
+}
+
+.typing-bubble {
+
+  background: #f1f5f9 !important;
+
+  color: #64748b !important;
+
+  padding: 0.8rem 1.2rem;
+
+}
+
+.typing-dots {
+
+  display: flex;
+
+  gap: 0.3rem;
+
+}
+
+.typing-dots span {
+
+  width: 8px;
+
+  height: 8px;
+
+  background: #64748b;
+
+  border-radius: 50%;
+
+  animation: typing 1.4s infinite ease-in-out;
+
+}
+
+.typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+
+.typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes typing {
+
+  0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+
+  40% { transform: scale(1); opacity: 1; }
+
+}
+
+.products-suggestions {
+
+  margin-top: 1rem;
+
+  padding: 0.8rem;
+
+  background: #f8fafc;
+
+  border-radius: 0.5rem;
+
+  border-left: 3px solid #2563eb;
+
+}
+
+.products-suggestions h4 {
+
+  margin: 0 0 0.5rem 0;
+
+  color: #2563eb;
+
+  font-size: 0.9rem;
+
+}
+
+.product-item {
+
+  font-size: 0.9rem;
+
+  margin: 0.2rem 0;
+
+  color: #374151;
+
+}
+
+.cart-info {
+
+  margin-top: 1rem;
+
+  padding: 0.8rem;
+
+  background: #fef3c7;
+
+  border-radius: 0.5rem;
+
+  border-left: 3px solid #f59e0b;
+
+}
+
+.cart-info h4 {
+
+  margin: 0 0 0.5rem 0;
+
+  color: #92400e;
+
+  font-size: 0.9rem;
+
+}
+
+.cart-item {
+
+  font-size: 0.9rem;
+
+  margin: 0.2rem 0;
+
+  color: #92400e;
+
+}
+
+.cart-total {
+
+  font-weight: bold;
+
+  margin-top: 0.5rem;
+
+  color: #92400e;
+
+}
+
+.image-preview {
+
+  display: flex;
+
+  align-items: center;
+
+  margin-right: 0.5rem;
+
+  position: relative;
+
+}
+
+.image-preview img {
+
+  max-width: 48px;
+
+  max-height: 48px;
+
+  border-radius: 0.5rem;
+
+  box-shadow: 0 1px 4px #2563eb33;
+
+}
+
+.remove-img {
+
+  position: absolute;
+
+  top: -8px;
+
+  right: -8px;
+
+  background: #f87171;
+
+  color: #fff;
+
+  border: none;
+
+  border-radius: 50%;
+
+  width: 20px;
+
+  height: 20px;
+
+  font-size: 1rem;
+
+  cursor: pointer;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  box-shadow: 0 1px 4px #f87171aa;
+
+}
+
+.bubble.image-bubble {
+
+  padding: 0.5rem;
+
+  background: #fff;
+
+  display: flex;
+
+  align-items: center;
+
+}
+
+.bubble.image-bubble img {
+
+  max-width: 180px;
+
+  max-height: 120px;
+
+  border-radius: 0.7rem;
+
+  box-shadow: 0 1px 4px #2563eb33;
+
+}
+
+.assistant-footer {
+
+  display: flex;
+
+  align-items: center;
+
+  padding: 1.2rem 1.5rem;
+
+  border-top: 1px solid #e5e7eb;
+
+  background: #f8fafc;
+
+  gap: 0.5rem;
+
+}
+
+.assistant-input {
+
+  flex: 1 1 auto;
+
+  border: 1px solid #cbd5e1;
+
+  border-radius: 0.75rem;
+
+  padding: 0.7rem 1.2rem;
+
+  font-size: 1.08rem;
+
+  outline: none;
+
+  background: #fff;
+
+  color: #1e293b;
+
+  transition: border 0.2s;
+
+}
+
+.assistant-input:focus {
+
+  border: 1.5px solid #2563eb;
+
+}
+
+.assistant-input:disabled {
+
+  background: #f1f5f9;
+
+  color: #64748b;
+
+  cursor: not-allowed;
+
+}
+
+.icon-btn {
+
+  background: none;
+
+  border: none;
+
+  padding: 0.4rem;
+
+  border-radius: 0.5rem;
+
+  cursor: pointer;
+
+  display: flex;
+
+  align-items: center;
+
+  transition: background 0.15s;
+
+}
+
+.icon-btn:hover:not(:disabled) {
+
+  background: #e0e7ff;
+
+}
+
+.icon-btn:disabled {
+
+  opacity: 0.5;
+
+  cursor: not-allowed;
+
+}
+
+.send-btn {
+
+  background: #2563eb;
+
+  color: #fff;
+
+  border-radius: 0.5rem;
+
+  padding: 0.4rem 0.7rem;
+
+  margin-left: 0.2rem;
+
+  transition: background 0.15s;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+}
+
+.send-btn svg {
+
+  fill: white;
+
+}
+
+.send-btn:hover:not(:disabled) {
+
+  background: #1d4ed8;
+
+}
+
+.send-btn:disabled {
+
+  background: #94a3b8;
+
+  cursor: not-allowed;
+
+}
+
+.recording {
+
+  background: #fee2e2 !important;
+
+}
+
+.mic-anim circle {
+
+  transform-origin: 12px 12px;
+
+}
+
+.mic-denied {
+
+  background: #fee2e2;
+
+  color: #b91c1c;
+
+  padding: 0.75rem 1rem;
+
+  border-radius: 0.75rem;
+
+  margin: 1rem;
+
+  text-align: center;
+
+  font-size: 0.95rem;
+
+  box-shadow: 0 1px 4px #f87171aa;
+
+}
+
+.connection-error {
+
+  background: #fef3c7;
+
+  color: #92400e;
+
+  padding: 0.75rem 1rem;
+
+  border-radius: 0.75rem;
+
+  margin: 1rem;
+
+  text-align: center;
+
+  font-size: 0.95rem;
+
+  box-shadow: 0 1px 4px #f59e0baa;
+
+}
+
+.transcribing-toast {
+
+  position: absolute;
+
+  left: 50%;
+
+  bottom: 110px;
+
+  transform: translateX(-50%);
+
+  background: #2563eb;
+
+  color: #fff;
+
+  padding: 0.7rem 1.5rem;
+
+  border-radius: 1rem;
+
+  font-size: 1rem;
+
+  box-shadow: 0 2px 8px #2563eb33;
+
+  z-index: 3000;
+
+  animation: fadeInOut 2s;
+
+}
+
+@keyframes fadeInOut {
+
+  0% { opacity: 0; }
+
+  10% { opacity: 1; }
+
+  90% { opacity: 1; }
+
+  100% { opacity: 0; }
+
+}
+
+@media (max-width: 900px) {
+
+  .assistant-modal.chatbot {
+
+    right: 0.5rem;
+
+    left: 0.5rem;
+
+    width: auto;
+
+    height: 80vh;
+
+    min-height: 350px;
+
+    bottom: 7.5rem;
+
+  }
+
+  .assistant-fab {
+
+    right: 0.5rem;
+
+    bottom: 0.5rem;
+
+  }
+
+}
+
+</style>
+
+

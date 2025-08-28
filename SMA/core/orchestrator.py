@@ -46,6 +46,7 @@ class ChatState(TypedDict):
     products: List[Dict]
     recommendations: List[Dict]
     order_info: Dict[str, Any]
+    cart: Dict[str, Any]
     
     # Réponse finale
     response_text: str
@@ -667,6 +668,7 @@ class ChatBotOrchestrator:
                 "products": [],
                 "recommendations": [],
                 "order_info": {},
+                "cart": {}, # Initialize cart
                 "response_text": "",
                 "response_type": "",
                 "escalate": False,
@@ -694,7 +696,8 @@ class ChatBotOrchestrator:
                 "agents_used": result_state.get("agents_used", []),
                 "processing_time": processing_time,
                 "products": result_state.get("products", []),
-                "recommendations": result_state.get("recommendations", [])
+                "recommendations": result_state.get("recommendations", []),
+                "cart": result_state.get("cart", {}) # Include cart in the result
             }
         except Exception as e:
             logger.error(f"[process_message] Erreur détaillée: {str(e)}")
@@ -707,7 +710,8 @@ class ChatBotOrchestrator:
                 "agents_used": [],
                 "processing_time": time.time() - start_time,
                 "products": [],
-                "recommendations": []
+                "recommendations": [],
+                "cart": {} # Ensure cart is empty on error
             }
 
 # Instance globale de l'orchestrateur

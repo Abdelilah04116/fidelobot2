@@ -17,7 +17,7 @@ class UserSimulationAgent(BaseAgent):
         :param user_profile: Dictionnaire décrivant le profil (préférences, historique, etc.)
         :param scenario: Nom ou description du scénario à jouer
         """
-        super().__init__(name="UserSimulationAgent")
+        super().__init__(name="user_simulation_agent", description="Agent simulant un utilisateur e-commerce")
         self.user_profile = user_profile or {
             "email": f"user{random.randint(1000,9999)}@test.com",
             "password": "test1234",
@@ -26,6 +26,12 @@ class UserSimulationAgent(BaseAgent):
         }
         self.scenario = scenario
         self.state = {}
+
+    def get_system_prompt(self) -> str:
+        """
+        Prompt système pour l'agent utilisateur simulé (peut être personnalisé selon le scénario).
+        """
+        return "Vous êtes un agent simulant un utilisateur humain sur un site e-commerce."
 
     async def execute(self, state: Dict[str, Any]) -> Dict[str, Any]:
         """
@@ -73,13 +79,12 @@ class UserSimulationAgent(BaseAgent):
                 print(f"[AUI] Erreur connexion: {e}")
             # Si échec, inscription
             try:
-                resp = await client.post(f"{base_url}/api/auth/signup", json={
+                resp = await client.post(f"{base_url}/api/auth/register", json={
                     "email": email,
                     "password": password,
-                    "prenom": self.user_profile["prenom"],
-                    "nom": self.user_profile["nom"]
+                    "username": self.user_profile["prenom"].lower()
                 })
-                if resp.status_code == 201:
+                if resp.status_code in (200, 201):
                     data = resp.json()
                     self.state["token"] = data.get("access_token")
                     self.state["user_id"] = data.get("user_id")
@@ -106,16 +111,16 @@ class UserSimulationAgent(BaseAgent):
         """
         base_url = "http://localhost:8000"  # À adapter selon config
         token = self.state.get("token")
-        params = {"query": query}
+        params = {"q": query}
         if filters:
             params.update(filters)
         headers = {"Authorization": f"Bearer {token}"} if token else {}
         try:
             async with httpx.AsyncClient() as client:
-                resp = await client.get(f"{base_url}/api/products/search", params=params, headers=headers)
+                resp = await client.get(f"{base_url}/api/products/", params=params, headers=headers)
                 if resp.status_code == 200:
                     data = resp.json()
-                    self.state["search_results"] = data.get("products", data)
+                    self.state["search_results"] = data
                     print(f"[AUI] Recherche produits: {len(self.state['search_results'])} résultats trouvés.")
                 else:
                     print(f"[AUI] Échec recherche produits: {resp.text}")
@@ -146,19 +151,17 @@ class UserSimulationAgent(BaseAgent):
             if not results:
                 print("[AUI] Aucun produit à ajouter au panier.")
                 return
-            # Prendre le premier produit (ou choisir aléatoirement)
-            product = results[0] if isinstance(results[0], dict) else results[0][0]
-            product_id = product.get("id") or product.get("product_id")
+            product_id = results[0].get("id") if isinstance(results[0], dict) else results[0]
         try:
             async with httpx.AsyncClient() as client:
                 resp = await client.post(f"{base_url}/api/cart/add", json={
                     "user_id": user_id,
                     "product_id": product_id,
-                    "quantity": quantity
+                    "quantite": quantity
                 }, headers=headers)
                 if resp.status_code == 200:
                     data = resp.json()
-                    self.state["cart"] = data.get("cart", data)
+                    self.state["cart"] = data
                     print(f"[AUI] Produit {product_id} ajouté au panier.")
                 else:
                     print(f"[AUI] Échec ajout panier: {resp.text}")
@@ -185,12 +188,6 @@ class UserSimulationAgent(BaseAgent):
         """
         # TODO: Appeler l'API support client
         pass
-
-    def get_system_prompt(self) -> str:
-        """
-        Prompt système pour l'agent utilisateur simulé (peut être personnalisé selon le scénario).
-        """
-        return "Vous êtes un agent simulant un utilisateur humain sur un site e-commerce."
 
 # Exemple de scénario utilisateur (à adapter dans simulate_behavior)
 # 1. Connexion ou inscription
