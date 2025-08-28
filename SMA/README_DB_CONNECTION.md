@@ -332,3 +332,4 @@ En cas de problème :
 2. Lancez les tests : `python test_db_connections.py`
 3. Vérifiez la configuration : variables d'environnement
 4. Consultez la documentation des drivers : SQLAlchemy, qdrant-client
+

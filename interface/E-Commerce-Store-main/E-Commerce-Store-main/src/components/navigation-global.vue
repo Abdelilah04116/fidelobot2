@@ -87,7 +87,7 @@ function hideHamburger(): void {
 			<!-- Logo -->
 			<router-link
 				to="/"
-				class="text-3xl font-extrabold tracking-tight antialiased transition duration-300 hover:scale-110 hover:text-k-main"
+				class="text-3xl font-extrabold tracking-tight antialiased transition duration-300 hover:scale-110 hover:text-k-main text-black"
 				data-test="nav-logo"
 			>
 				KIIIBS
@@ -97,25 +97,25 @@ function hideHamburger(): void {
 			<nav class="hidden tracking-widest lg:flex lg:gap-8">
 				<router-link
 					to="/"
-					class="uppercase text-white transition duration-300 hover:text-k-main active:translate-y-0.5"
+					class="uppercase text-black transition duration-300 hover:text-k-main active:translate-y-0.5"
 					data-test="nav-home"
 					>Home
 				</router-link>
 				<router-link
 					to="/keyboards"
-					class="uppercase text-white transition duration-300 hover:text-k-main active:translate-y-0.5"
+					class="uppercase text-black transition duration-300 hover:text-k-main active:translate-y-0.5"
 					data-test="nav-keyboards"
 					>Keyboards
 				</router-link>
 				<router-link
 					to="/keycaps"
-					class="uppercase text-white transition duration-300 hover:text-k-main active:translate-y-0.5"
+					class="uppercase text-black transition duration-300 hover:text-k-main active:translate-y-0.5"
 					data-test="nav-keycaps"
 					>Keycaps
 				</router-link>
 				<router-link
 					to="/deskmats"
-					class="uppercase text-white transition duration-300 hover:text-k-main active:translate-y-0.5"
+					class="uppercase text-black transition duration-300 hover:text-k-main active:translate-y-0.5"
 					data-test="nav-deskmats"
 					>Deskmats
 				</router-link>

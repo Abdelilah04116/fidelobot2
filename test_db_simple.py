@@ -72,3 +72,4 @@ except Exception as e:
     print(f"\n❌ Erreur: {str(e)}")
     import traceback
     traceback.print_exc()
+

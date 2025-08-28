@@ -46,39 +46,94 @@ Format de sortie JSON strict :
 
     async def process_image(self, image_data: bytes, image_format: str = "webm") -> Dict[str, Any]:
         """
-        Traite une image et recherche des produits correspondants
+        Traite une image et recherche des produits correspondants (workflow one-shot)
         """
         try:
-            # Convertir l'image en format PIL
+            # 1. Convertir l'image en format PIL
             image = self._convert_to_pil(image_data, image_format)
             if image is None:
                 return self._create_error_response("Impossible de traiter l'image")
-            
-            # Analyser le contenu de l'image
-            image_analysis = self.image_tools.analyze_image_content(image)
-            
-            # Extraire l'embedding de l'image
+
+            # 2. Extraire les caractéristiques visuelles (embedding)
             image_embedding = self.image_tools.extract_image_embedding(image)
             if image_embedding is None:
                 return self._create_error_response("Impossible d'extraire les caractéristiques de l'image")
-            
-            # Générer une description textuelle
+
+            # 2bis. OCR pour logo/marque
+            ocr_text = self.image_tools.extract_text_from_image(image)
+            # (optionnel: on pourrait appeler un tool ocr_logo_brand si besoin)
+
+            # 3. Générer une description textuelle pour la recherche hybride
+            image_analysis = self.image_tools.analyze_image_content(image)
             search_query = self.image_tools.generate_image_description(image_analysis)
-            
-            # Recherche hybride (image + texte)
+            if ocr_text:
+                search_query += f". Texte détecté: {ocr_text[:100]}"
+
+            # 4. Recherche hybride (image + texte)
             search_results = await self.vector_tools.hybrid_search(
                 image_embedding=image_embedding,
                 text_query=search_query,
                 image_weight=0.7,
                 text_weight=0.3,
-                limit=15
+                limit=10
             )
-            
-            # Structurer la réponse
-            response = self._structure_response(search_results, search_query, image_analysis)
-            
-            return response
-            
+
+            # 5. Récupérer infos produit + stock + images pour chaque résultat
+            enriched_results = []
+            for prod in search_results:
+                prod_id = prod.get("id")
+                # a) Récupérer infos catalogue (catalog_get)
+                # (ici on suppose que prod contient déjà les infos principales)
+                # b) Récupérer stock (inventory_get)
+                # (on suppose champ 'stock' ou on simule)
+                # c) Récupérer images associées
+                image_urls = []
+                try:
+                    image_urls = await self.vector_tools.get_product_images(prod_id)
+                except Exception:
+                    image_urls = []
+                prod["image_url"] = image_urls[0] if image_urls else None
+                enriched_results.append(prod)
+
+            # 6. Sélectionner le meilleur match et alternatives
+            best_match = enriched_results[0] if enriched_results else None
+            alternatives = enriched_results[1:6] if len(enriched_results) > 1 else []
+
+            # 7. Calculer la confiance
+            confidence = min(0.95, best_match.get("combined_score", 0.0) if best_match else 0.0)
+
+            # 8. Si indisponible ou stock=0, proposer variantes
+            if not best_match or best_match.get("stock", 1) == 0:
+                alternatives = await self.vector_tools.search_alternatives(best_match or {}, limit=5)
+                # enrichir les alternatives avec image_url
+                for alt in alternatives:
+                    try:
+                        alt_imgs = await self.vector_tools.get_product_images(alt.get("id"))
+                        alt["image_url"] = alt_imgs[0] if alt_imgs else None
+                    except Exception:
+                        alt["image_url"] = None
+
+            # 9. Si confiance < 0.75, demander clarification
+            if confidence < 0.75:
+                return {
+                    "detected_product": best_match,
+                    "best_match": best_match,
+                    "alternatives_ranked": alternatives,
+                    "confidence": confidence,
+                    "search_query": search_query,
+                    "clarification_needed": True,
+                    "message": "Je ne suis pas certain du produit détecté. Pouvez-vous préciser ou envoyer une autre image ?"
+                }
+
+            # 10. Sortie JSON strict
+            return {
+                "detected_product": best_match,
+                "best_match": best_match,
+                "alternatives_ranked": alternatives,
+                "confidence": confidence,
+                "search_query": search_query
+            }
+
         except Exception as e:
             return self._create_error_response(f"Erreur lors du traitement de l'image: {str(e)}")
 

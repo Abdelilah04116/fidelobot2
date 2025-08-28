@@ -47,12 +47,12 @@ class CartManagementAgent:
         try:
             db = SessionLocal()
             if action == "add":
-            if not product_id:
+                if not product_id:
                     return {"response_text": "Spécifiez l'ID du produit à ajouter (ex: ajouter produit 58)", "cart": self.get_cart(db, user_id)}
                 cart = self.add_to_cart(db, user_id, product_id, quantite=quantity)
                 return {"response_text": f"Produit {product_id} ajouté au panier.", "cart": cart}
             elif action == "remove":
-            if not product_id:
+                if not product_id:
                     return {"response_text": "Spécifiez l'ID du produit à retirer (ex: retirer produit 58)", "cart": self.get_cart(db, user_id)}
                 cart = self.remove_from_cart(db, user_id, product_id)
                 return {"response_text": f"Produit {product_id} retiré du panier.", "cart": cart}

@@ -90,6 +90,7 @@ class ChatBotOrchestrator:
         workflow.add_node("escalation_agent", self._escalation_node)
         workflow.add_node("final_response", self._final_response_node)
         workflow.add_node("user_simulation_agent", self._user_simulation_node)
+        workflow.add_node("multimodal_agent", self._multimodal_node)
         
         # Définir les arêtes et conditions
         workflow.set_entry_point("voice_agent")
@@ -104,19 +105,26 @@ class ChatBotOrchestrator:
             }
         )
         
-        # Flux principal
-        workflow.add_edge("conversation_agent", "profiling_agent")
+        # Flux principal - utiliser seulement la route conditionnelle
+        workflow.add_conditional_edges(
+            "conversation_agent",
+            self._route_after_conversation,
+            {
+                "user_simulation_agent": "user_simulation_agent",
+                "multimodal_agent": "multimodal_agent",
+                "profiling_agent": "profiling_agent"
+            }
+        )
+        
         workflow.add_conditional_edges(
             "profiling_agent",
             self._route_after_profiling,
             {
                 "product_search_agent": "product_search_agent",
-                # "recommendation_agent": "recommendation_agent",  # DÉSACTIVÉ
                 "order_management_agent": "order_management_agent",
                 "cart_management_agent": "cart_management_agent",
                 "escalation_agent": "escalation_agent",
-                "summarizer_agent": "summarizer_agent",
-                "conversation_agent": "conversation_agent"  # Ajout explicite du fallback
+                "summarizer_agent": "summarizer_agent"
             }
         )
         
@@ -148,15 +156,11 @@ class ChatBotOrchestrator:
         workflow.add_edge("escalation_agent", "final_response")
         workflow.add_edge("final_response", END)
         
-        # Exemple : après le conversation_agent, possibilité d'appeler l'agent utilisateur simulé
-        workflow.add_conditional_edges(
-            "conversation_agent",
-            self._route_after_conversation,
-            {
-                "user_simulation_agent": "user_simulation_agent",
-                "profiling_agent": "profiling_agent"
-            }
-        )
+        # Connecter user_simulation_agent au reste du workflow
+        workflow.add_edge("user_simulation_agent", "summarizer_agent")
+        
+        # Connecter multimodal_agent au reste du workflow
+        workflow.add_edge("multimodal_agent", "summarizer_agent")
         
         return workflow.compile()
     
@@ -354,6 +358,13 @@ class ChatBotOrchestrator:
         agent = self.agents["user_simulation_agent"]
         return await agent.execute(state)
     
+    async def _multimodal_node(self, state: ChatState) -> ChatState:
+        """
+        Nœud d'exécution de l'agent multimodal
+        """
+        agent = self.agents["multimodal_agent"]
+        return await agent.execute(state)
+    
     # Fonctions de routage conditionnel
     def _route_after_voice(self, state: ChatState) -> str:
         """Router après le traitement vocal"""
@@ -377,7 +388,7 @@ class ChatBotOrchestrator:
         if intent in ["product_search", "product_info", "availability_check", "list_products"]:
             return "product_search_agent"
         elif intent in ["recommendation", "gift_suggestion", "bestsellers"]:
-            return "conversation_agent"  # DÉSACTIVÉ - utilise fallback personnalisé
+            return "summarizer_agent"  # Utiliser summarizer_agent au lieu de conversation_agent
         elif intent in ["order_status", "track_delivery", "order_management"]:
             return "order_management_agent"
         elif intent in ["cart_management", "cart_view", "view_cart", "panier"]:
@@ -387,8 +398,8 @@ class ChatBotOrchestrator:
         elif intent in ["greeting", "general_chat", "help"]:
             return "summarizer_agent"
         else:
-            # Pour les intentions non reconnues, retourner vers conversation_agent (fallback personnalisé)
-            return "conversation_agent"
+            # Pour les intentions non reconnues, aller vers summarizer_agent
+            return "summarizer_agent"
     
     def _route_after_product_search(self, state: ChatState) -> str:
         """Router après la recherche de produits"""
@@ -417,11 +428,15 @@ class ChatBotOrchestrator:
         """
         Route après le nœud de conversation :
         - Si le state contient 'simulate_user' à True, on appelle l'agent utilisateur simulé
-        - Sinon, on continue le flux normal
+        - Si c'est un message avec image (audio_data présent), on appelle l'agent multimodal
+        - Sinon, on continue le flux normal vers profiling_agent
         """
         if state.get("simulate_user"):
             return "user_simulation_agent"
-        return "profiling_agent"
+        elif state.get("audio_data") and state.get("audio_format") in ["png", "jpg", "jpeg", "gif", "webp"]:
+            return "multimodal_agent"
+        else:
+            return "profiling_agent"
     
     # Fonctions utilitaires
     async def _extract_search_criteria(self, message: str) -> Dict[str, Any]:
