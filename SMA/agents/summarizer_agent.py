@@ -200,6 +200,9 @@ class SummarizerAgent(BaseAgent):
         elif intent == "customer_service":
             return "Je suis là pour vous aider ! Pouvez-vous me décrire votre problème ou votre question ?\n\nJe peux vous assister pour :\n• Problèmes de commande\n• Questions sur les produits\n• Retours et remboursements\n• Informations générales"
         
+        elif intent == "bot_role":
+            return "Je suis un assistant virtuel conçu pour vous aider à trouver des produits, gérer vos commandes et répondre à vos questions sur notre boutique."
+        
         else:
             # Réponse générique mais dynamique
             return "Merci pour votre message. Dites-moi simplement ce dont vous avez besoin (ex: rechercher un produit, suivre une commande, obtenir une recommandation)."

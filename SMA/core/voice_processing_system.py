@@ -76,6 +76,9 @@ class VoiceProcessingSystem:
                 "aide", "help", "support", "assistance",
                 "help", "support", "assist",
                 "مساعدة", "دعم", "مساعدة"
+            ],
+            "bot_role": [
+                "rôle", "role", "mission", "qui es-tu", "ta fonction", "ta mission", "à quoi sers-tu", "présente-toi", "about you", "your role", "who are you"
             ]
         }
         

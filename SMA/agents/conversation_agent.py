@@ -43,6 +43,11 @@ class ConversationAgent(BaseAgent):
         state["intent"] = intent
         state["confidence"] = 0.8
         
+        # Gestion spécifique pour l'intention 'bot_role'
+        if intent == "bot_role":
+            state["response_text"] = "Je suis un assistant virtuel conçu pour vous aider à trouver des produits, gérer vos commandes et répondre à vos questions sur notre boutique."
+            return state
+        
         # Déterminer les agents à solliciter
         agents = self.determine_agents(intent)
 
@@ -63,6 +68,8 @@ class ConversationAgent(BaseAgent):
         message_lower = message.lower()
         
         # Détection directe pour les cas évidents - ORDRE IMPORTANT (plus spécifique en premier)
+        if any(word in message_lower for word in ["rôle", "role", "mission", "qui es-tu", "ta fonction", "ta mission", "à quoi sers-tu", "présente-toi", "about you", "your role", "who are you"]):
+            return "bot_role"
         if any(word in message_lower for word in ["bonjour", "salut", "hello", "hi", "hey"]):
             return "greeting"
         elif any(word in message_lower for word in ["panier", "cart", "voir mon panier", "mon panier", "afficher panier"]):

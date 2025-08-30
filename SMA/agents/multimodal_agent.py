@@ -193,7 +193,7 @@ Format de sortie JSON strict :
 
     def _create_error_response(self, error_message: str) -> Dict[str, Any]:
         """Crée une réponse d'erreur standardisée"""
-            return {
+        return {
             "detected_product": None,
             "best_match": None,
             "alternatives_ranked": [],
@@ -213,7 +213,7 @@ Format de sortie JSON strict :
             image_format = state.get("audio_format", "webm")
             
             if not image_data:
-            return {
+                return {
                     "response_text": "Aucune image reçue. Veuillez envoyer une image de produit.",
                     "error": "Pas d'image"
                 }
@@ -221,8 +221,8 @@ Format de sortie JSON strict :
             # Décoder l'image base64
             try:
                 image_bytes = base64.b64decode(image_data)
-        except Exception:
-            return {
+            except Exception:
+                return {
                     "response_text": "Format d'image non reconnu. Veuillez envoyer une image valide.",
                     "error": "Format invalide"
                 }
@@ -240,7 +240,7 @@ Format de sortie JSON strict :
             # Extraire les produits pour l'UI
             products = self._extract_products_for_ui(result)
                 
-                return {
+            return {
                 "response_text": response_text,
                 "multimodal_result": result,
                 "products": products

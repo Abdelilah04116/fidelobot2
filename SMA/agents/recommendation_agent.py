@@ -1,12 +1,26 @@
 from .base_agent import BaseAgent
 from typing import Dict, Any, List, Optional
-from catalogue.backend.database import SessionLocal
-from catalogue.backend.models import User, Product, Order, OrderItem
+# Import des modèles (à adapter selon ta structure)
+try:
+    from catalogue.backend.database import SessionLocal
+except ImportError:
+    # Fallback si les modèles ne sont pas disponibles
+    SessionLocal = None
+try:
+    from catalogue.backend.models import User, Product, Order, OrderItem
+except ImportError:
+    # Fallback si les modèles ne sont pas disponibles
+    User = Product = Order = OrderItem = None
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
 import logging
 import math
-from catalogue.backend.qdrant_client import client as qdrant_client, search_embedding
+try:
+    from catalogue.backend.qdrant_client import client as qdrant_client, search_embedding
+except ImportError:
+    # Fallback si les modèles ne sont pas disponibles
+    qdrant_client = None
+    search_embedding = None
 # AGENT CONNECTÉ À QDRANT (vectoriel)
 # Utilisez search_embedding(...) pour la recherche de recommandations sémantiques
 
@@ -62,6 +76,31 @@ class RecommendationAgent(BaseAgent):
             return {"valid": False, "error": f"Type de recommandation invalide. Types valides: {', '.join(valid_types)}"}
         
         return {"valid": True}
+    
+    async def get_recommendations(self, user_profile: Dict[str, Any], limit: int) -> List[Dict[str, Any]]:
+        """Méthode de base pour obtenir des recommandations"""
+        try:
+            # Fallback simple si les modèles ne sont pas disponibles
+            if not SessionLocal or not User:
+                return self._get_fallback_recommendations(limit)
+            
+            # Logique de recommandation complète
+            return await self.get_personalized_recommendations_safe(
+                user_profile.get("user_id", 1), 
+                "general", 
+                limit
+            )
+        except Exception as e:
+            self.logger.error(f"Erreur dans get_recommendations: {e}")
+            return self._get_fallback_recommendations(limit)
+    
+    def _get_fallback_recommendations(self, limit: int) -> List[Dict[str, Any]]:
+        """Recommandations de fallback quand la base de données n'est pas disponible"""
+        return [
+            {"id": 1, "name": "Produit recommandé 1", "category": "Général", "score": 0.9},
+            {"id": 2, "name": "Produit recommandé 2", "category": "Général", "score": 0.8},
+            {"id": 3, "name": "Produit recommandé 3", "category": "Général", "score": 0.7}
+        ][:limit]
     
     async def get_personalized_recommendations_safe(self, user_id: int, rec_type: str, limit: int) -> Dict[str, Any]:
         """Recommandations personnalisées pour un utilisateur connecté de manière sécurisée"""

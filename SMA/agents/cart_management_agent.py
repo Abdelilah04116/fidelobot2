@@ -1,14 +1,22 @@
+from .base_agent import BaseAgent
 from fastapi import APIRouter, FastAPI, HTTPException, status, Depends
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
-from catalogue.backend.database import SessionLocal
-from catalogue.backend.models import Panier, PanierProduit, Product, Utilisateur
 from datetime import datetime
 import logging
 
+# Import des modèles (à adapter selon ta structure)
+try:
+    from catalogue.backend.database import SessionLocal
+    from catalogue.backend.models import Panier, PanierProduit, Product, Utilisateur
+except ImportError:
+    # Fallback si les modèles ne sont pas disponibles
+    SessionLocal = None
+    Panier = PanierProduit = Product = Utilisateur = None
+
 # Agent de gestion du panier
-class CartManagementAgent:
+class CartManagementAgent(BaseAgent):
     """
     Agent pour la gestion du panier e-commerce (PostgreSQL).
 
@@ -20,7 +28,26 @@ class CartManagementAgent:
     >>> agent.clear_cart(user_id=1)
     """
     def __init__(self):
+        super().__init__(
+            name="cart_management_agent",
+            description="Agent de gestion du panier e-commerce"
+        )
         self.logger = logging.getLogger("cart_management_agent")
+
+    def get_system_prompt(self) -> str:
+        return """
+        Vous êtes un expert en gestion de panier e-commerce.
+        Votre rôle est d'aider les utilisateurs à gérer leur panier d'achat.
+        
+        Capacités:
+        - Ajouter des produits au panier
+        - Retirer des produits du panier
+        - Voir le contenu du panier
+        - Vider le panier
+        - Calculer les totaux
+        
+        Soyez toujours précis et sécurisé dans la gestion des données.
+        """
 
     def get_db(self):
         db = SessionLocal()

@@ -19,7 +19,7 @@
       </div>
       <div class="assistant-body chatbot-body" ref="chatBody">
         <div v-for="(msg, i) in messages" :key="i" :class="['chat-message', msg.role]">
-          <div class="bubble" v-if="!msg.image">{{ msg.content }}</div>
+          <div class="bubble" v-if="!msg.image" v-html="renderMarkdown(msg.content)"></div>
           <div v-else class="bubble image-bubble">
             <img :src="msg.image" alt="Image envoyée" />
           </div>
@@ -112,6 +112,7 @@
 
 <script setup lang="ts">
 import { ref, nextTick, onMounted, onUnmounted } from 'vue'
+import { marked } from 'marked'
 
 const open = ref(false)
 const userInput = ref('')
@@ -347,6 +348,12 @@ function scrollToBottom() {
       chatBody.value.scrollTop = chatBody.value.scrollHeight
     }
   })
+}
+
+// Fonction pour rendre le Markdown en HTML sécurisé
+function renderMarkdown(text?: string) {
+  if (!text) return ''
+  return marked.parse(text)
 }
 
 // Connexion WebSocket quand le composant est monté

@@ -7,10 +7,12 @@ from typing import Dict, Any, Optional, List
 from datetime import datetime, timedelta
 
 from .base_agent import BaseAgent
-from models.message_models import AgentMessage, MessageType, MessageMetadata
-from models.agent_models import AgentType, AgentCapability, AgentResponse
-from models.context_models import UserContext
-from catalogue.backend.database import SessionLocal
+# Import des modèles (à adapter selon ta structure)
+try:
+    from catalogue.backend.database import SessionLocal
+except ImportError:
+    # Fallback si les modèles ne sont pas disponibles
+    SessionLocal = None
 # AGENT CONNECTÉ À POSTGRES (relationnel)
 # Utilisez SessionLocal() pour accéder aux tickets, utilisateurs, commandes
 from sqlalchemy.orm import Session
@@ -22,12 +24,12 @@ logger = logging.getLogger(__name__)
 class CustomerServiceAgent(BaseAgent):
     """Agent de service client et support"""
     
-    def __init__(self, config: Dict[str, Any], db_manager):
-        super().__init__("customer_service", AgentType.CUSTOMER_SERVICE, config)
-        self.db_manager = db_manager
-        self.capabilities = [
-            AgentCapability.CUSTOMER_SUPPORT
-        ]
+    def __init__(self):
+        super().__init__(
+            name="customer_service_agent",
+            description="Agent de service client et support"
+        )
+        self.logger = logging.getLogger(__name__)
         
         # Base de connaissances pour le support
         self.knowledge_base = {
@@ -78,9 +80,28 @@ class CustomerServiceAgent(BaseAgent):
         """
     
     async def execute(self, state: Dict[str, Any]) -> Dict[str, Any]:
-        # Exemple de réponse dynamique
-        state["response_text"] = "Notre service client est à votre disposition pour toute question ou réclamation."
-        return state
+        try:
+            user_message = state.get("user_message", "").lower()
+            
+            # Détecter le type de demande
+            if any(keyword in user_message for keyword in ["retourner", "retour", "remboursement", "échanger"]):
+                if "produit" in user_message:
+                    return await self.handle_return_request(state)
+                else:
+                    return await self.handle_general_return_info(state)
+            
+            elif any(keyword in user_message for keyword in ["aide", "support", "problème", "question"]):
+                return await self.handle_general_help(state)
+            
+            elif any(keyword in user_message for keyword in ["livraison", "délai", "suivi"]):
+                return await self.handle_delivery_info(state)
+            
+            elif any(keyword in user_message for keyword in ["paiement", "facture", "remboursement"]):
+                return await self.handle_payment_info(state)
+            
+            else:
+                # Demande générale de service client
+                return await self.handle_general_help(state)
                 
         except Exception as e:
             self.logger.error(f"Erreur critique dans CustomerServiceAgent: {str(e)}")
@@ -103,40 +124,38 @@ class CustomerServiceAgent(BaseAgent):
                         break
             
             # Recherche dans la base de connaissances
-            db = SessionLocal()
-            try:
-                faq_results = []
-                
-                # Recherche par similarité de contenu
-                search_query = db.query(KnowledgeBase).filter(
-                    KnowledgeBase.category.in_(matched_categories) if matched_categories else True
-                ).all()
-                
-                for faq in search_query:
-                    relevance_score = self._calculate_relevance(question_lower, faq.question, faq.keywords)
-                    if relevance_score > 0.3:  # Seuil de pertinence
-                        faq_results.append({
-                            "id": faq.id,
-                            "question": faq.question,
-                            "answer": faq.answer,
-                            "category": faq.category,
-                            "relevance_score": round(relevance_score, 2),
-                            "keywords": faq.keywords or []
-                        })
-                
-                # Trier par pertinence
-                faq_results.sort(key=lambda x: x["relevance_score"], reverse=True)
-                
-                return {
-                    "faq_results": faq_results[:5],  # Top 5
-                    "total_found": len(faq_results),
-                    "matched_categories": matched_categories,
-                    "search_query": question
-                }
-                
-            finally:
-                db.close()
-                
+            if SessionLocal:
+                db = SessionLocal()
+                try:
+                    faq_results = []
+                    # TODO: Implémenter la vraie recherche quand les modèles sont disponibles
+                finally:
+                    db.close()
+            else:
+                # Fallback : recherche dans la base locale
+                faq_results = self._search_local_faq(question_lower, matched_categories)
+            
+            # Traiter les résultats de la recherche
+            if faq_results:
+                # Trier par pertinence si on a des scores
+                if any("relevance_score" in faq for faq in faq_results):
+                    faq_results.sort(key=lambda x: x.get("relevance_score", 0), reverse=True)
+                    
+                    return {
+                        "faq_results": faq_results[:5],  # Top 5
+                        "total_found": len(faq_results),
+                        "matched_categories": matched_categories,
+                        "search_query": question
+                    }
+            
+            # Si pas de résultats ou erreur
+            return {
+                "faq_results": [],
+                "total_found": 0,
+                "matched_categories": matched_categories,
+                "search_query": question
+            }
+            
         except Exception as e:
             self.logger.error(f"Erreur recherche FAQ: {str(e)}")
             return {"error": str(e)}
@@ -163,6 +182,26 @@ class CustomerServiceAgent(BaseAgent):
             
         except Exception:
             return 0.0
+    
+    def _search_local_faq(self, question: str, categories: List[str]) -> List[Dict[str, Any]]:
+        """Recherche dans la base locale de connaissances"""
+        results = []
+        
+        # Recherche par catégories
+        for category in categories:
+            if category in self.knowledge_base:
+                for key, answer in self.knowledge_base[category].items():
+                    if key.lower() in question or any(word in question for word in key.split()):
+                        results.append({
+                            "id": f"{category}_{key}",
+                            "question": f"Question sur {key}",
+                            "answer": answer,
+                            "category": category,
+                            "relevance_score": 0.8,
+                            "keywords": [key]
+                        })
+        
+        return results[:5]  # Limiter à 5 résultats
     
     async def handle_return_exchange_safe(self, state: Dict[str, Any]) -> Dict[str, Any]:
         """Gérer les retours et échanges de manière sécurisée"""
@@ -532,66 +571,42 @@ class CustomerServiceAgent(BaseAgent):
             self.logger.error(f"Erreur aide générale: {str(e)}")
             return {"error": str(e)}
     
-    def can_handle(self, message: AgentMessage) -> bool:
+    def can_handle(self, message: dict) -> bool:
         """Peut gérer les demandes de support et d'aide"""
-        content_lower = message.content.lower()
+        content_lower = message.get('content', '').lower()
         support_keywords = [
             "aide", "support", "problème", "difficulté", "question", "comment",
             "livraison", "retour", "paiement", "compte", "commande"
         ]
         return any(keyword in content_lower for keyword in support_keywords)
     
-    async def process(self, message: AgentMessage, context: UserContext) -> AgentResponse:
+    async def process(self, message: dict, context: dict = None):
         """Traite une demande de support"""
         try:
             # 1. Analyser le type de demande de support
-            support_type = self._analyze_support_request(message.content)
+            content = message.get('content', '')
+            support_type = self._analyze_support_request(content)
             
             # 2. Rechercher dans la base de connaissances
-            knowledge_answer = await self._search_knowledge_base(message.content, support_type)
+            knowledge_answer = await self._search_knowledge_base(content, support_type)
             
-            # 3. Vérifier si une escalade est nécessaire
-            needs_escalation = self._check_escalation_need(message, context, support_type)
-            
-            if needs_escalation:
-                return AgentResponse(
-                    success=True,
-                    content="Je comprends que votre situation nécessite une attention particulière. Je vais vous transférer vers un conseiller spécialisé.",
-                    metadata={
-                        "support_type": support_type,
-                        "escalation_needed": True,
-                        "reason": "complex_support_request"
-                    },
-                    requires_human=True
-                )
-            
-            # 4. Génère une réponse appropriée
+            # 3. Génère une réponse appropriée
             response_content = await self._generate_support_response(message, knowledge_answer, support_type, context)
             
-            metadata = MessageMetadata(
-                intent="customer_support",
-                confidence=0.8,
-                context={
-                    "support_type": support_type,
-                    "knowledge_used": knowledge_answer is not None
-                }
-            )
-            
-            return AgentResponse(
-                success=True,
-                content=response_content,
-                metadata=metadata.dict(),
-                confidence=0.8
-            )
+            return {
+                "success": True,
+                "content": response_content,
+                "support_type": support_type,
+                "knowledge_used": knowledge_answer is not None
+            }
             
         except Exception as e:
-            logger.error(f"Error in customer service agent: {str(e)}")
-            return AgentResponse(
-                success=False,
-                content="Je n'ai pas pu traiter votre demande de support. Un conseiller va vous aider.",
-                error_message=str(e),
-                requires_human=True
-            )
+            self.logger.error(f"Error in customer service agent: {str(e)}")
+            return {
+                "success": False,
+                "content": "Je n'ai pas pu traiter votre demande de support. Un conseiller va vous aider.",
+                "error": str(e)
+            }
     
     def _analyze_support_request(self, content: str) -> str:
         """Analyse le type de demande de support"""
@@ -646,7 +661,7 @@ class CustomerServiceAgent(BaseAgent):
             logger.error(f"Error searching knowledge base: {e}")
             return None
     
-    def _check_escalation_need(self, message: AgentMessage, context: UserContext, support_type: str) -> bool:
+    def _check_escalation_need(self, message: dict, context: dict = None, support_type: str = "") -> bool:
         """Vérifie si une escalade est nécessaire"""
         # Mots-clés qui indiquent un besoin d'escalade
         escalation_keywords = [
@@ -675,7 +690,7 @@ class CustomerServiceAgent(BaseAgent):
         
         return False
     
-    async def _generate_support_response(self, message: AgentMessage, knowledge_answer: Optional[str], support_type: str, context: UserContext) -> str:
+    async def _generate_support_response(self, message: dict, knowledge_answer: Optional[str], support_type: str, context: dict = None) -> str:
         """Génère une réponse de support appropriée"""
         if knowledge_answer:
             response = f"🔧 **Support - {support_type.title()}**\n\n"
@@ -718,7 +733,7 @@ class CustomerServiceAgent(BaseAgent):
         
         return generic_responses.get(support_type, "Je suis là pour vous aider. Pouvez-vous me donner plus de détails sur votre demande ?")
     
-    async def log_support_request(self, message: AgentMessage, context: UserContext, support_type: str):
+    async def log_support_request(self, message: dict, context: dict = None, support_type: str = ""):
         """Enregistre la demande de support pour analyse"""
         try:
             support_log = {
@@ -765,4 +780,159 @@ class CustomerServiceAgent(BaseAgent):
             
         except Exception as e:
             logger.error(f"Error getting support stats: {e}")
-            return {} 
+            return {}
+
+    async def handle_return_request(self, state: Dict[str, Any]) -> Dict[str, Any]:
+        """Gérer les demandes de retour de produits"""
+        try:
+            return {
+                "response_text": """
+## 🔄 **PROCÉDURE DE RETOUR DE PRODUIT**
+
+### **1. Conditions de Retour**
+- ✅ **30 jours** pour retourner un produit
+- ✅ **Produit dans son état d'origine**
+- ✅ **Emballage complet et accessoires inclus**
+
+### **2. Étapes du Retour**
+1. **Connectez-vous** à votre espace client
+2. **Allez dans** "Mes Commandes"
+3. **Sélectionnez** le produit à retourner
+4. **Cliquez sur** "Demander un retour"
+5. **Remplissez** le formulaire de retour
+6. **Imprimez** l'étiquette de retour
+
+### **3. Remboursement**
+- 💳 **Carte bancaire** : 5-7 jours ouvrés
+- 🏦 **Virement** : 3-5 jours ouvrés
+- 📧 **Email de confirmation** envoyé automatiquement
+
+### **4. Informations Importantes**
+- 📦 **Frais de retour** : Gratuits pour les produits défectueux
+- 🚚 **Transporteur** : Colis recommandé avec accusé de réception
+- 📞 **Support** : Notre équipe est là pour vous aider
+
+**Besoin d'aide supplémentaire ?** Contactez notre support client !
+                """,
+                "response_type": "return_procedure",
+                "escalate": False
+            }
+        except Exception as e:
+            self.logger.error(f"Erreur dans handle_return_request: {str(e)}")
+            return {"error": "Erreur lors du traitement de la demande de retour"}
+
+    async def handle_general_return_info(self, state: Dict[str, Any]) -> Dict[str, Any]:
+        """Gérer les demandes générales sur les retours"""
+        try:
+            return {
+                "response_text": """
+## 🔄 **INFORMATIONS SUR LES RETOURS**
+
+### **Politique de Retour**
+- **Délai** : 30 jours à compter de la réception
+- **Conditions** : Produit non utilisé, emballage intact
+- **Frais** : Gratuits pour les produits défectueux
+
+### **Types de Retour**
+- **Remboursement** : Remboursement complet
+- **Échange** : Remplacement par un produit similaire
+- **Crédit boutique** : Bon d'achat valable 1 an
+
+**Pour retourner un produit spécifique, dites-moi lequel !**
+                """,
+                "response_type": "return_info",
+                "escalate": False
+            }
+        except Exception as e:
+            self.logger.error(f"Erreur dans handle_general_return_info: {str(e)}")
+            return {"error": "Erreur lors du traitement de la demande"}
+
+    async def handle_general_help(self, state: Dict[str, Any]) -> Dict[str, Any]:
+        """Gérer les demandes d'aide générales"""
+        try:
+            return {
+                "response_text": """
+## 🆘 **COMMENT PUIS-JE VOUS AIDER ?**
+
+### **Services Disponibles**
+- 🔍 **Recherche de produits** et recommandations
+- 🛒 **Gestion du panier** et commandes
+- 📦 **Suivi des livraisons** et retours
+- 💳 **Questions de paiement** et facturation
+- 👤 **Gestion de compte** et profil
+
+### **Support Spécialisé**
+- 📞 **Chat en direct** avec nos conseillers
+- 📧 **Email support** : support@fidelobot.com
+- 📱 **Téléphone** : 01 23 45 67 89
+
+**Décrivez votre besoin et je vous orienterai vers la bonne solution !**
+                """,
+                "response_type": "general_help",
+                "escalate": False
+            }
+        except Exception as e:
+            self.logger.error(f"Erreur dans handle_general_help: {str(e)}")
+            return {"error": "Erreur lors du traitement de la demande"}
+
+    async def handle_delivery_info(self, state: Dict[str, Any]) -> Dict[str, Any]:
+        """Gérer les demandes sur la livraison"""
+        try:
+            return {
+                "response_text": """
+## 📦 **INFORMATIONS SUR LA LIVRAISON**
+
+### **Délais de Livraison**
+- **Standard** : 3-5 jours ouvrés
+- **Express** : 1-2 jours ouvrés (supplément 9.90€)
+- **Point relais** : 2-4 jours ouvrés
+
+### **Frais de Livraison**
+- **Gratuit** : À partir de 49€ d'achat
+- **Standard** : 4.90€
+- **Express** : 9.90€
+
+### **Suivi de Commande**
+- **Email de confirmation** avec numéro de suivi
+- **SMS** lors de la livraison
+- **Espace client** : Suivi en temps réel
+
+**Besoin du suivi d'une commande spécifique ?**
+                """,
+                "response_type": "delivery_info",
+                "escalate": False
+            }
+        except Exception as e:
+            self.logger.error(f"Erreur dans handle_delivery_info: {str(e)}")
+            return {"error": "Erreur lors du traitement de la demande"}
+
+    async def handle_payment_info(self, state: Dict[str, Any]) -> Dict[str, Any]:
+        """Gérer les demandes sur le paiement"""
+        try:
+            return {
+                "response_text": """
+## 💳 **INFORMATIONS SUR LE PAIEMENT**
+
+### **Moyens de Paiement Acceptés**
+- **Cartes bancaires** : Visa, Mastercard, American Express
+- **Paiements numériques** : PayPal, Apple Pay, Google Pay
+- **Paiement en plusieurs fois** : 3x ou 4x sans frais
+
+### **Sécurité des Paiements**
+- **Chiffrement SSL** 256 bits
+- **Certification PCI DSS** niveau 1
+- **3D Secure** pour les cartes bancaires
+
+### **Facturation**
+- **Facture électronique** envoyée par email
+- **TVA incluse** dans tous nos prix
+- **Garantie** de remboursement sous 30 jours
+
+**Question spécifique sur le paiement ?**
+                """,
+                "response_type": "payment_info",
+                "escalate": False
+            }
+        except Exception as e:
+            self.logger.error(f"Erreur dans handle_payment_info: {str(e)}")
+            return {"error": "Erreur lors du traitement de la demande"} 

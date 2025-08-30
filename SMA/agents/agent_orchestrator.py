@@ -36,7 +36,7 @@ class AgentOrchestrator(BaseAgent):
             "monitoring": MonitoringAgent(),
             "gdpr": GDPRAgent(),
             "cart_management": CartManagementAgent(),
-            "customer_service": CustomerServiceAgent(),
+            "customer_service": CustomerServiceAgent(),  # Maintenant corrigé
             "security": SecurityAgent(),
             "multimodal": MultimodalAgent(),
             "social": SocialAgent(),
@@ -131,7 +131,8 @@ class AgentOrchestrator(BaseAgent):
     
     async def execute(self, state: Dict[str, Any]) -> Dict[str, Any]:
         try:
-            user_query = state.get("user_query", "")
+            # Utiliser le champ standard venant du frontend / orchestrateur
+            user_query = state.get("user_message", state.get("user_query", ""))
             user_id = state.get("user_id")
             session_id = state.get("session_id")
             context = state.get("context", {})
@@ -179,6 +180,10 @@ class AgentOrchestrator(BaseAgent):
                 "commande": ["US9", "US11", "US12"],
                 "livraison": ["US13", "US14"],
                 "retour": ["US15"],
+                "retourner": ["US15"],  # Ajouté pour "retourner un produit"
+                "remboursement": ["US15"],  # Ajouté pour les demandes de remboursement
+                "échanger": ["US15"],  # Ajouté pour les échanges
+                "récupérer": ["US15"],  # Ajouté pour les récupérations
                 "aide": ["US17", "US18"],
                 "recommandation": ["US1", "US22"],
                 "promotion": ["US5", "US20"],
@@ -192,10 +197,25 @@ class AgentOrchestrator(BaseAgent):
                 "accessibilité": ["US33", "US34", "US35"]
             }
             
+            # Détection intelligente des intentions
             for keyword, stories in keyword_mapping.items():
                 if keyword in query_lower:
-                    identified_stories.extend(stories)
+                    # Cas spécial pour "retourner" - vérifier le contexte
+                    if keyword == "retourner":
+                        # Si c'est "retourner un produit", c'est US15 (retour)
+                        # Si c'est "retourner des produits", c'est US2 (recherche)
+                        if "produit" in query_lower and len(query_lower.split()) <= 4:
+                            identified_stories.extend(stories)  # US15 - Retour
+                        elif "produits" in query_lower or "tous" in query_lower:
+                            identified_stories.extend(["US2"])  # US2 - Recherche
+                        else:
+                            identified_stories.extend(stories)  # US15 par défaut
+                    else:
+                        identified_stories.extend(stories)
             
+            # Si aucune story détectée, router vers le service client par défaut
+            if not identified_stories:
+                identified_stories = ["US17"]
             # Dédupliquer et limiter
             identified_stories = list(set(identified_stories))[:5]
             

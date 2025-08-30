@@ -41,10 +41,10 @@ class SecurityAgent(BaseAgent):
         """
     
     async def execute(self, state: Dict[str, Any]) -> Dict[str, Any]:
-        # Exemple de réponse dynamique
-        state["response_text"] = "Vos données sont protégées grâce à des protocoles de sécurité avancés et un chiffrement de bout en bout."
-        return state
-                
+        try:
+            # Exemple de réponse dynamique
+            state["response_text"] = "Vos données sont protégées grâce à des protocoles de sécurité avancés et un chiffrement de bout en bout."
+            return state
         except Exception as e:
             self.logger.error(f"Erreur critique dans SecurityAgent: {str(e)}")
             return {"error": "Erreur technique de sécurité"}
